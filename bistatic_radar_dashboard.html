@@ -1,804 +1,1606 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8">
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Bistatic Radar Fading & Joint Diversity Interactive Dashboard</title>
+
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+
   <style>
+
     input[type=range] { accent-color: #3b82f6; }
+
     .tab-btn.active { border-bottom: 2px solid #3b82f6; color: #3b82f6; font-weight: 600; }
+
     sub, sup { font-size: 75%; line-height: 0; position: relative; vertical-align: baseline; }
+
     sub { bottom: -0.25em; }
+
     sup { top: -0.5em; }
+
   </style>
+
 </head>
+
 <body class="bg-slate-900 text-slate-100 min-h-screen p-4 sm:p-6 font-sans antialiased">
+
   
+
   <div class="max-w-7xl mx-auto space-y-6">
+
     <!-- Header -->
+
     <div class="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-800 pb-4 gap-4">
+
       <div>
+
         <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-400 via-indigo-300 to-teal-400 bg-clip-text text-transparent">
+
           Bistatic Radar Two-Ray Fading &amp; Joint Diversity Simulator
+
         </h1>
+
         <p class="text-slate-400 text-sm mt-1">
-          Physics-accurate 3D multipath ground reflection, angular/range fading, and joint frequency-height diversity (88–108 MHz FM band).
+
+          Physics-accurate 3D multipath ground reflection, angular/range fading, and joint frequency-height diversity (88 to 108 MHz FM band).
+
         </p>
+
       </div>
+
       <div class="flex items-center gap-3">
+
         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-900/60 text-blue-300 border border-blue-700/50">
-          VHF FM Band: 88 – 108 MHz
+
+          VHF FM Band: 88 to 108 MHz
+
         </span>
+
         <button id="resetBtn" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+
           Reset Defaults
+
         </button>
+
       </div>
+
     </div>
 
+
+
     <!-- Main Grid: Controls Left, Visualizations Right -->
+
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
       
+
       <!-- CONTROLS SIDEBAR (4 cols) -->
+
       <div class="lg:col-span-4 bg-slate-800/80 border border-slate-700/60 rounded-2xl p-5 space-y-5 h-fit shadow-xl">
+
         <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400 border-b border-slate-700/50 pb-2">
+
           System &amp; Geometric Parameters
+
         </h2>
 
+
+
         <!-- Geometry Controls -->
+
         <div class="space-y-3">
+
           <div>
+
             <div class="flex justify-between text-xs font-medium">
+
               <span>Carrier Frequency:</span>
+
               <span id="fcVal" class="text-blue-400 font-mono">98.0 MHz</span>
+
             </div>
+
             <input type="range" id="fcInput" min="88" max="108" step="0.5" value="98" class="w-full h-1.5 bg-slate-700 rounded-lg cursor-pointer">
+
           </div>
 
+
+
           <div>
+
             <div class="flex justify-between text-xs font-medium">
+
               <span>Tx Mast Height (<i>h</i><sub>t</sub>):</span>
+
               <span id="htVal" class="text-blue-400 font-mono">120 m</span>
+
             </div>
+
             <input type="range" id="htInput" min="20" max="250" step="5" value="120" class="w-full h-1.5 bg-slate-700 rounded-lg cursor-pointer">
+
           </div>
 
+
+
           <div>
+
             <div class="flex justify-between text-xs font-medium">
+
               <span>Rx Mast Antenna 1 (<i>h</i><sub>r1</sub>):</span>
+
               <span id="hr1Val" class="text-blue-400 font-mono">12 m</span>
+
             </div>
+
             <input type="range" id="hr1Input" min="5" max="40" step="1" value="12" class="w-full h-1.5 bg-slate-700 rounded-lg cursor-pointer">
+
           </div>
 
+
+
           <div>
+
             <div class="flex justify-between text-xs font-medium">
+
               <span>Rx Mast Antenna 2 (<i>h</i><sub>r2</sub>):</span>
+
               <span id="hr2Val" class="text-blue-400 font-mono">22 m</span>
+
             </div>
+
             <input type="range" id="hr2Input" min="5" max="40" step="1" value="22" class="w-full h-1.5 bg-slate-700 rounded-lg cursor-pointer">
+
           </div>
 
+
+
           <div>
+
             <div class="flex justify-between text-xs font-medium">
+
               <span>Tx-Rx Baseline (<i>L</i>):</span>
+
               <span id="baseVal" class="text-blue-400 font-mono">40 km</span>
+
             </div>
+
             <input type="range" id="baseInput" min="10" max="80" step="2" value="40" class="w-full h-1.5 bg-slate-700 rounded-lg cursor-pointer">
+
           </div>
 
+
+
           <div>
+
             <div class="flex justify-between text-xs font-medium">
+
               <span>Target Altitude (<i>h</i><sub>tgt</sub>):</span>
+
               <span id="tgtHVal" class="text-blue-400 font-mono">2500 m</span>
+
             </div>
+
             <input type="range" id="tgtHInput" min="500" max="8000" step="100" value="2500" class="w-full h-1.5 bg-slate-700 rounded-lg cursor-pointer">
+
           </div>
 
+
+
           <div>
+
             <div class="flex justify-between text-xs font-medium">
+
               <span>Target Orbit Radius (<i>R</i>):</span>
+
               <span id="radiusVal" class="text-blue-400 font-mono">45 km</span>
+
             </div>
+
             <input type="range" id="radiusInput" min="10" max="90" step="1" value="45" class="w-full h-1.5 bg-slate-700 rounded-lg cursor-pointer">
+
           </div>
 
+
+
           <div>
+
             <div class="flex justify-between text-xs font-medium">
+
               <span>Range Cut Azimuth (&theta;):</span>
-              <span id="azCutVal" class="text-blue-400 font-mono">90° (Broadside)</span>
+
+              <span id="azCutVal" class="text-blue-400 font-mono">90&deg; (Broadside)</span>
+
             </div>
-            <input type="range" id="azCutInput" min="0" max="360" step="5" value="90" class="w-full h-1.5 bg-slate-700 rounded-lg cursor-pointer">
+
+            <input type="range" id="azCutInput" min="0" max="360&deg; step="5" value="90" class="w-full h-1.5 bg-slate-700 rounded-lg cursor-pointer">
+
           </div>
+
         </div>
+
+
 
         <!-- Ground & Polarization -->
+
         <div class="pt-3 border-t border-slate-700/50 space-y-3">
+
           <div class="grid grid-cols-2 gap-3">
+
             <div>
+
               <label class="text-xs font-medium text-slate-300 block mb-1">Polarization:</label>
+
               <select id="polSelect" class="w-full bg-slate-700 text-xs text-slate-200 rounded-lg p-2 border border-slate-600 focus:outline-none focus:border-blue-500">
+
                 <option value="vertical" selected>Vertical (TM)</option>
+
                 <option value="horizontal">Horizontal (TE)</option>
+
               </select>
+
             </div>
+
             <div>
+
               <label class="text-xs font-medium text-slate-300 block mb-1">Ground Type:</label>
+
               <select id="groundSelect" class="w-full bg-slate-700 text-xs text-slate-200 rounded-lg p-2 border border-slate-600 focus:outline-none focus:border-blue-500">
+
                 <option value="medium" selected>Medium Ground</option>
+
                 <option value="wet">Wet Ground</option>
+
                 <option value="seawater">Seawater</option>
+
                 <option value="dry">Dry Soil</option>
+
                 <option value="pec">Perfect Conductor</option>
+
               </select>
+
             </div>
+
           </div>
+
         </div>
+
+
 
         <!-- Diversity Configuration -->
+
         <div class="pt-3 border-t border-slate-700/50 space-y-2">
+
           <label class="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1">
+
             Active Multi-Carrier FM Channels:
+
           </label>
+
           <div class="grid grid-cols-3 gap-2 text-xs">
+
             <label class="flex items-center gap-1.5 bg-slate-900/60 p-1.5 rounded-lg border border-slate-700/80 cursor-pointer">
+
               <input type="checkbox" id="f1Check" checked class="rounded text-blue-500"> 88.5M
+
             </label>
+
             <label class="flex items-center gap-1.5 bg-slate-900/60 p-1.5 rounded-lg border border-slate-700/80 cursor-pointer">
+
               <input type="checkbox" id="f2Check" class="rounded text-blue-500"> 93.0M
+
             </label>
+
             <label class="flex items-center gap-1.5 bg-slate-900/60 p-1.5 rounded-lg border border-slate-700/80 cursor-pointer">
+
               <input type="checkbox" id="f3Check" checked class="rounded text-blue-500"> 98.0M
+
             </label>
+
             <label class="flex items-center gap-1.5 bg-slate-900/60 p-1.5 rounded-lg border border-slate-700/80 cursor-pointer">
+
               <input type="checkbox" id="f4Check" class="rounded text-blue-500"> 103.0M
+
             </label>
+
             <label class="flex items-center gap-1.5 bg-slate-900/60 p-1.5 rounded-lg border border-slate-700/80 cursor-pointer">
+
               <input type="checkbox" id="f5Check" checked class="rounded text-blue-500"> 107.5M
+
             </label>
+
           </div>
+
           <p class="text-[11px] text-slate-400 mt-1">
+
             Combining Active Channels (<i>M</i><sub>f</sub>) &times; Mast Heights (<i>M</i><sub>s</sub> = 2) &rarr; <strong id="totalBranchesLabel" class="text-teal-400">6 Diversity Branches</strong>.
+
           </p>
+
         </div>
+
       </div>
 
+
+
       <!-- VISUALIZATIONS & TABS (8 cols) -->
+
       <div class="lg:col-span-8 space-y-4">
+
         
+
         <!-- Tab Navigation -->
+
         <div class="flex border-b border-slate-800 text-sm gap-6 pb-2 overflow-x-auto">
-          <button class="tab-btn active transition py-1" onclick="switchTab('angularTab')">1. Angular Fading (360°)</button>
-          <button class="tab-btn text-slate-400 hover:text-slate-200 transition py-1" onclick="switchTab('rangeTab')">2. Range Fading (5 – 100 km)</button>
+
+          <button class="tab-btn active transition py-1" onclick="switchTab('angularTab')">1. Angular Fading (360&deg; deg;)</button>
+
+          <button class="tab-btn text-slate-400 hover:text-slate-200 transition py-1" onclick="switchTab('rangeTab')">2. Range Fading (5 to 100 km)</button>
+
           <button class="tab-btn text-slate-400 hover:text-slate-200 transition py-1" onclick="switchTab('spatialTab')">3. 2D Spatial Heatmap</button>
+
           <button class="tab-btn text-slate-400 hover:text-slate-200 transition py-1" onclick="switchTab('statsTab')">4. Outage &amp; Coverage CDF</button>
+
         </div>
+
+
 
         <!-- TAB 1: Angular Fading -->
+
         <div id="angularTab" class="tab-pane space-y-4">
+
           <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-4 shadow-xl">
+
             <div class="flex justify-between items-center mb-3">
-              <h3 class="text-sm font-semibold text-slate-200">Received SNR vs Azimuth Angle (0° – 360°) at <i>R</i> = 45 km</h3>
+
+              <h3 class="text-sm font-semibold text-slate-200">Received SNR vs Azimuth Angle (0&deg; &ndash; 360&deg; deg;) at <i>R</i> = 45 km</h3>
+
               <div class="text-xs text-slate-400 flex items-center gap-3">
+
                 <span class="inline-block w-3 h-3 bg-red-500 rounded-full"></span> Single 98MHz
+
                 <span class="inline-block w-3 h-3 bg-blue-500 rounded-full"></span> Freq MRC
+
                 <span class="inline-block w-3 h-3 bg-emerald-400 rounded-full"></span> Joint Hybrid MRC
+
               </div>
+
             </div>
+
             <canvas id="angularCanvas" width="750" height="340" class="w-full bg-slate-900 rounded-xl"></canvas>
+
           </div>
+
           
+
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+
             <div class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-3">
+
               <div class="text-xs text-slate-400">Single 98MHz Deep Fade (5th %)</div>
+
               <div id="p5SingleAng" class="text-lg font-bold text-red-400 mt-0.5">+2.4 dB</div>
+
             </div>
+
             <div class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-3">
+
               <div class="text-xs text-slate-400">Joint Hybrid MRC Fade Floor</div>
+
               <div id="p5HybAng" class="text-lg font-bold text-emerald-400 mt-0.5">+19.8 dB</div>
+
             </div>
+
             <div class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-3">
+
               <div class="text-xs text-slate-400">Worst-Case Fade Mitigation Gain</div>
+
               <div id="gainAng" class="text-lg font-bold text-teal-300 mt-0.5">+17.4 dB</div>
+
             </div>
+
           </div>
+
         </div>
+
+
 
         <!-- TAB 2: Range Fading -->
+
         <div id="rangeTab" class="tab-pane hidden space-y-4">
+
           <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-4 shadow-xl">
+
             <div class="flex justify-between items-center mb-3">
-              <h3 class="text-sm font-semibold text-slate-200">Received SNR vs Radial Range (5 km – 100 km)</h3>
+
+              <h3 class="text-sm font-semibold text-slate-200">Received SNR vs Radial Range (5 km &ndash; 100 km)</h3>
+
               <div class="text-xs text-slate-400 flex items-center gap-3">
+
                 <span class="inline-block w-3 h-3 bg-red-500 rounded-full"></span> Single 98MHz (Range Nulls)
+
                 <span class="inline-block w-3 h-3 bg-emerald-400 rounded-full"></span> Joint Hybrid MRC
+
               </div>
+
             </div>
+
             <canvas id="rangeCanvas" width="750" height="340" class="w-full bg-slate-900 rounded-xl"></canvas>
+
           </div>
+
           <div class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-3 text-xs text-slate-300 leading-relaxed">
-            <strong class="text-teal-300">Physics Insight:</strong> In the single-channel baseline (red), the path difference &Delta;<i>R</i>(<i>R</i>) &asymp; 2<i>h</i><sub>t</sub><i>h</i><sub>tgt</sub> / <i>R</i> produces concentric blind null rings (5 – 35 km) and steep <i>R</i><sup>&minus;8</sup> asymptotic ground cancellation at long range. The Joint Hybrid MRC architecture (green) completely fills all range null rings.
+
+            <strong class="text-teal-300">Physics Insight:</strong> In the single-channel baseline (red), the path difference &Delta;<i>R</i>(<i>R</i>) &asymp; 2<i>h</i><sub>t</sub><i>h</i><sub>tgt</sub> / <i>R</i> produces concentric blind null rings (5 to 35 km) and steep <i>R</i><sup>&minus;8</sup> asymptotic ground cancellation at long range. The Joint Hybrid MRC architecture (green) completely fills all range null rings.
+
           </div>
+
         </div>
 
+
+
         <!-- TAB 3: 2D Spatial Heatmap with Full Legends -->
+
         <div id="spatialTab" class="tab-pane hidden space-y-4">
+
           <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-4 shadow-xl space-y-3">
+
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+
               <h3 class="text-sm font-semibold text-slate-200">2D Spatial Fading Factor (<i>F</i><sup>4</sup> in dB) across 100 &times; 100 km</h3>
+
               
+
               <!-- Geometric Icons Legend -->
+
               <div class="flex items-center gap-4 text-xs text-slate-300 bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-700/80">
+
                 <span class="flex items-center gap-1.5">
+
                   <span class="inline-block w-3 h-3 bg-yellow-400 rounded-full"></span> Tx Mast
+
                 </span>
+
                 <span class="flex items-center gap-1.5">
+
                   <span class="inline-block w-3 h-3 bg-emerald-400 rounded-full"></span> Rx Mast
+
                 </span>
+
                 <span class="flex items-center gap-1.5">
+
                   <span class="inline-block w-4 border-t-2 border-dashed border-white"></span> Baseline
+
                 </span>
+
                 <span class="flex items-center gap-1.5">
+
                   <span class="inline-block w-4 border-t-2 border-dashed border-cyan-400"></span> Orbit (<i>R</i>)
+
                 </span>
+
               </div>
+
             </div>
+
+
 
             <canvas id="spatialCanvas" width="750" height="380" class="w-full bg-slate-900 rounded-xl"></canvas>
 
+
+
             <!-- COLORBAR LEGEND -->
+
             <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-3 space-y-1.5">
+
               <div class="flex justify-between text-xs font-semibold text-slate-300">
+
                 <span>Color Code Legend: Pattern Propagation Factor <i>F</i><sup>4</sup> (dB)</span>
+
                 <span class="text-slate-400 text-[11px]">Free Space = 0 dB</span>
+
               </div>
+
               
+
               <!-- Gradient Bar -->
+
               <div class="h-4 rounded-md w-full shadow-inner border border-slate-700" style="background: linear-gradient(to right, #1e3a8a 0%, #0284c7 25%, #059669 45%, #10b981 50%, #eab308 75%, #ef4444 100%);"></div>
+
               
+
               <!-- Colorbar Labels & Values -->
+
               <div class="flex justify-between text-[11px] font-mono text-slate-300 pt-0.5">
+
                 <div class="text-left">
+
                   <span class="font-bold text-blue-400">&le; &minus;20 dB</span>
+
                   <p class="text-[10px] text-slate-400 font-sans">Severe Destructive Null</p>
+
                 </div>
+
                 <div class="text-center">
+
                   <span class="font-bold text-sky-300">&minus;10 dB</span>
+
                   <p class="text-[10px] text-slate-400 font-sans">Partial Multipath Fade</p>
+
                 </div>
+
                 <div class="text-center">
+
                   <span class="font-bold text-emerald-300">0 dB</span>
+
                   <p class="text-[10px] text-emerald-400 font-sans font-semibold">Free Space Baseline</p>
+
                 </div>
+
                 <div class="text-center">
+
                   <span class="font-bold text-yellow-300">+6 dB</span>
+
                   <p class="text-[10px] text-slate-400 font-sans">2-Ray Constructive Lobe</p>
+
                 </div>
+
                 <div class="text-right">
+
                   <span class="font-bold text-red-400">&ge; +12 dB</span>
+
                   <p class="text-[10px] text-slate-400 font-sans">Max 4-Way In-Phase Peak</p>
+
                 </div>
+
               </div>
+
             </div>
 
+
+
           </div>
+
+
 
           <!-- Color Interpretation Card -->
+
           <div class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-4 text-xs text-slate-300 space-y-2">
+
             <h4 class="font-bold text-blue-300 text-sm">Physical Interpretation of the 2D Multipath Colormap:</h4>
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
+
               <div class="bg-slate-900/60 p-2.5 rounded-lg border border-slate-700/60">
+
                 <span class="font-bold text-red-400 block mb-1">Red / Yellow (+6 to +12 dB):</span>
+
                 Direct and ground-reflected waves arrive in-phase (&Delta;&phi; = 2&pi;<i>n</i>). Voltage doubles on both links, boosting power by 2<sup>2</sup> &times; 2<sup>2</sup> = 16 = <strong>+12 dB</strong>.
+
               </div>
+
               <div class="bg-slate-900/60 p-2.5 rounded-lg border border-slate-700/60">
+
                 <span class="font-bold text-emerald-400 block mb-1">Green (0 dB):</span>
+
                 Represents nominal free-space propagation (no multipath enhancement or attenuation).
+
               </div>
+
               <div class="bg-slate-900/60 p-2.5 rounded-lg border border-slate-700/60">
+
                 <span class="font-bold text-blue-400 block mb-1">Deep Blue (&le; &minus;20 dB):</span>
-                Direct and ground-reflected waves arrive 180° out-of-phase (&Delta;&phi; = &pi;), canceling the signal and creating blind zones.
+
+                Direct and ground-reflected waves arrive 180&deg; out-of-phase (&Delta;&phi; = &pi;), canceling the signal and creating blind zones.
+
               </div>
+
             </div>
+
           </div>
+
         </div>
+
+
 
         <!-- TAB 4: Statistical Outage vs Coverage -->
+
         <div id="statsTab" class="tab-pane hidden space-y-4">
+
           <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-4 shadow-xl space-y-4">
+
             <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+
               <h3 class="text-sm font-semibold text-slate-200">Reliability &amp; Probability Curves</h3>
+
               <div class="flex items-center gap-3 bg-slate-900/80 p-1.5 rounded-lg border border-slate-700 text-xs">
+
                 <label class="cursor-pointer text-slate-300 flex items-center gap-1.5">
+
                   <input type="radio" name="probType" id="cdfRadio" checked onchange="updateAll()"> Outage CDF: <i>P</i>(SNR &le; &gamma;)
+
                 </label>
+
                 <label class="cursor-pointer text-slate-300 flex items-center gap-1.5">
+
                   <input type="radio" name="probType" id="ccdfRadio" onchange="updateAll()"> Coverage CCDF: <i>P</i>(SNR &ge; &gamma;)
+
                 </label>
+
               </div>
+
             </div>
+
             <canvas id="cdfCanvas" width="750" height="320" class="w-full bg-slate-900 rounded-xl"></canvas>
+
           </div>
+
+
 
           <div class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-4 text-xs text-slate-300 space-y-2">
+
             <h4 class="font-bold text-blue-300 text-sm">Why does Outage Probability go to 1.0 (100%) at high SNR?</h4>
+
             <p>
+
               By definition, <strong>Outage Probability</strong> is the Cumulative Distribution Function CDF(&gamma;<sub>th</sub>) = <i>P</i>(SNR &le; &gamma;<sub>th</sub>). It answers: <em>"What fraction of the target trajectory falls at or below required threshold &gamma;<sub>th</sub>?"</em>
+
             </p>
+
             <ul class="list-disc list-inside space-y-1 text-slate-400 pl-2">
+
               <li>If you require an impossibly high threshold (e.g. &gamma;<sub>th</sub> = +40 dB), virtually 100% of received signals are below +40 dB, so <strong class="text-red-300">Outage = 100% (1.0)</strong>.</li>
+
               <li>If your required detection threshold is &gamma;<sub>th</sub> = 0 dB, almost all signals are above 0 dB, so <strong class="text-emerald-300">Outage = 0% (0.0)</strong>.</li>
+
               <li>To see the curve that starts at 100% and drops to 0%, select <strong>"Coverage CCDF: <i>P</i>(SNR &ge; &gamma;)"</strong> above!</li>
+
             </ul>
+
           </div>
+
         </div>
 
+
+
       </div>
+
     </div>
+
   </div>
 
+
+
   <script>
+
     // --- GROUND DIELECTRIC MODELS ---
+
     const GROUND_PARAMS = {
+
       medium: { eps_r: 15.0, sigma: 0.005 },
+
       wet: { eps_r: 25.0, sigma: 0.02 },
+
       seawater: { eps_r: 80.0, sigma: 4.0 },
+
       dry: { eps_r: 4.0, sigma: 0.001 },
+
       pec: { eps_r: 1e10, sigma: 1e10 }
+
     };
 
+
+
     function switchTab(tabId) {
+
       document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+
       document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
       document.getElementById(tabId).classList.remove('hidden');
+
       event.target.classList.add('active');
+
       updateAll();
+
     }
+
+
 
     // --- PHYSICS CALCULATION ENGINE ---
+
     function computeTwoRayPoint(tx, rx, tgt, freqHz, pol, groundKey, rmsRough) {
+
       const c = 299792458.0;
+
       const lambda = c / freqHz;
+
       const k = 2 * Math.PI / lambda;
 
+
+
       // Direct vectors
+
       const dtx = Math.hypot(tgt.x - tx.x, tgt.y - tx.y);
+
       const drx = Math.hypot(rx.x - tgt.x, rx.y - tgt.y);
+
       const r_td = Math.hypot(dtx, tgt.z - tx.z);
+
       const r_rd = Math.hypot(drx, rx.z - tgt.z);
 
+
+
       // Reflected paths via image theory
+
       const r_tr = Math.hypot(dtx, tgt.z + tx.z);
+
       const r_rr = Math.hypot(drx, tgt.z + rx.z);
 
+
+
       const delta_rt = r_tr - r_td;
+
       const delta_rr = r_rr - r_rd;
 
+
+
       // Grazing angles
+
       const psi_t = Math.atan2(tx.z + tgt.z, dtx + 1e-6);
+
       const psi_r = Math.atan2(rx.z + tgt.z, drx + 1e-6);
 
+
+
       // Complex permittivity
+
       const gp = GROUND_PARAMS[groundKey];
+
       
+
       // Fresnel reflection approx
+
       function getFresnel(psi, isPolV) {
+
         if (groundKey === 'pec') return isPolV ? 1.0 : -1.0;
+
         const sinP = Math.sin(psi);
+
         const cosP = Math.cos(psi);
+
         const radicand = gp.eps_r - cosP * cosP;
+
         const sqR = Math.sqrt(Math.max(radicand, 0.1));
+
         if (!isPolV) {
+
           // Horizontal (TE)
+
           return (sinP - sqR) / (sinP + sqR);
+
         } else {
+
           // Vertical (TM)
+
           return (gp.eps_r * sinP - sqR) / (gp.eps_r * sinP + sqR);
+
         }
+
       }
+
+
 
       const isV = (pol === 'vertical');
+
       const gamma_t = getFresnel(psi_t, isV);
+
       const gamma_r = getFresnel(psi_r, isV);
 
+
+
       // Roughness factor
+
       const rho_t = Math.exp(-2 * Math.pow(2 * Math.PI * rmsRough * Math.sin(psi_t) / lambda, 2));
+
       const rho_r = Math.exp(-2 * Math.pow(2 * Math.PI * rmsRough * Math.sin(psi_r) / lambda, 2));
 
+
+
       // Propagation Factor |F|^2 = |1 + Gamma * rho * exp(-j * k * delta_r)|^2
+
       const phi_t = k * delta_rt;
+
       const A_t = gamma_t * rho_t;
+
       const ft_sq = Math.max(1 + 2 * A_t * Math.cos(phi_t) + A_t * A_t, 1e-6);
 
+
+
       const phi_r = k * delta_rr;
+
       const A_r = gamma_r * rho_r;
+
       const fr_sq = Math.max(1 + 2 * A_r * Math.cos(phi_r) + A_r * A_r, 1e-6);
 
+
+
       const f_total_pwr = ft_sq * fr_sq;
+
       const f_total_db = 10 * Math.log10(f_total_pwr);
 
+
+
       // Radar received power / SNR calculation
+
       const Pt = 1000.0, Gt = 1000.0, Gr = 1000.0, sigma_rcs = 1.0;
+
       const P_free = (Pt * Gt * Gr * lambda * lambda * sigma_rcs) / (Math.pow(4 * Math.PI, 3) * r_td * r_td * r_rd * r_rd + 1e-12);
+
       const P_noise = 1.38e-23 * 290 * 10e6 * 2.5;
+
       
+
       const snr_free_db = 10 * Math.log10(Math.max(P_free / P_noise, 1e-6));
+
       const snr_multipath_db = snr_free_db + f_total_db;
 
+
+
       return { f_total_db, snr_free_db, snr_multipath_db, snr_lin: Math.pow(10, snr_multipath_db / 10) };
+
     }
 
+
+
     // --- MAIN UPDATE & DRAW FUNCTION ---
+
     function updateAll() {
+
       const fc = parseFloat(document.getElementById('fcInput').value) * 1e6;
+
       const ht = parseFloat(document.getElementById('htInput').value);
+
       const hr1 = parseFloat(document.getElementById('hr1Input').value);
+
       const hr2 = parseFloat(document.getElementById('hr2Input').value);
+
       const baseline = parseFloat(document.getElementById('baseInput').value) * 1e3;
+
       const tgtH = parseFloat(document.getElementById('tgtHInput').value);
+
       const radius = parseFloat(document.getElementById('radiusInput').value) * 1e3;
+
       const azCut = parseFloat(document.getElementById('azCutInput').value);
+
       const pol = document.getElementById('polSelect').value;
+
       const ground = document.getElementById('groundSelect').value;
 
+
+
       document.getElementById('fcVal').innerText = (fc / 1e6).toFixed(1) + ' MHz';
+
       document.getElementById('htVal').innerText = ht + ' m';
+
       document.getElementById('hr1Val').innerText = hr1 + ' m';
+
       document.getElementById('hr2Val').innerText = hr2 + ' m';
+
       document.getElementById('baseVal').innerText = (baseline / 1e3).toFixed(0) + ' km';
+
       document.getElementById('tgtHVal').innerText = tgtH + ' m';
+
       document.getElementById('radiusVal').innerText = (radius / 1e3).toFixed(0) + ' km';
-      document.getElementById('azCutVal').innerText = azCut + '°';
+
+      document.getElementById('azCutVal').innerText = azCut + '&deg;';
+
+
 
       const activeFreqs = [];
+
       if (document.getElementById('f1Check').checked) activeFreqs.push(88.5e6);
+
       if (document.getElementById('f2Check').checked) activeFreqs.push(93.0e6);
+
       if (document.getElementById('f3Check').checked) activeFreqs.push(98.0e6);
+
       if (document.getElementById('f4Check').checked) activeFreqs.push(103.0e6);
+
       if (document.getElementById('f5Check').checked) activeFreqs.push(107.5e6);
+
       if (activeFreqs.length === 0) activeFreqs.push(fc);
 
+
+
       const heights = [hr1, hr2];
+
       const totalBranches = activeFreqs.length * heights.length;
+
       document.getElementById('totalBranchesLabel').innerText = `${totalBranches} Diversity Branches (${activeFreqs.length} Freqs \u00D7 ${heights.length} Heights)`;
 
+
+
       const tx = { x: -baseline / 2, y: 0, z: ht };
+
       const rx1 = { x: baseline / 2, y: 0, z: hr1 };
+
       const rx2 = { x: baseline / 2, y: 0, z: hr2 };
 
+
+
       // 1. ANGULAR SWEEP
-      const numAng = 360;
-      const snrSingleAng = [];
+
+      const numAng = 360&deg; const snrSingleAng = [];
+
       const snrFreqMrcAng = [];
+
       const snrHybMrcAng = [];
 
+
+
       for (let a = 0; a < numAng; a++) {
+
         const rad = (a * Math.PI) / 180;
+
         const tgt = { x: radius * Math.cos(rad), y: radius * Math.sin(rad), z: tgtH };
 
+
+
         const ptSingle = computeTwoRayPoint(tx, rx1, tgt, fc, pol, ground, 0.05);
+
         snrSingleAng.push(ptSingle.snr_multipath_db);
 
+
+
         let sumFreqLin = 0;
+
         for (let f of activeFreqs) {
+
           sumFreqLin += computeTwoRayPoint(tx, rx1, tgt, f, pol, ground, 0.05).snr_lin;
+
         }
+
         snrFreqMrcAng.push(10 * Math.log10(Math.max(sumFreqLin, 1e-6)));
 
+
+
         let sumHybLin = 0;
+
         for (let f of activeFreqs) {
+
           for (let h of heights) {
+
             sumHybLin += computeTwoRayPoint(tx, { x: baseline / 2, y: 0, z: h }, tgt, f, pol, ground, 0.05).snr_lin;
+
           }
+
         }
+
         snrHybMrcAng.push(10 * Math.log10(Math.max(sumHybLin, 1e-6)));
+
       }
 
+
+
       const sortedSingle = [...snrSingleAng].sort((a,b) => a - b);
+
       const sortedHyb = [...snrHybMrcAng].sort((a,b) => a - b);
+
       const p5S = sortedSingle[Math.floor(numAng * 0.05)];
+
       const p5H = sortedHyb[Math.floor(numAng * 0.05)];
+
       document.getElementById('p5SingleAng').innerText = (p5S >= 0 ? '+' : '') + p5S.toFixed(1) + ' dB';
+
       document.getElementById('p5HybAng').innerText = (p5H >= 0 ? '+' : '') + p5H.toFixed(1) + ' dB';
+
       document.getElementById('gainAng').innerText = '+' + (p5H - p5S).toFixed(1) + ' dB';
+
+
 
       drawAngularPlot(snrSingleAng, snrFreqMrcAng, snrHybMrcAng);
 
+
+
       // 2. RANGE SWEEP
+
       const numR = 250;
+
       const rMin = 5e3, rMax = 100e3;
+
       const snrSingleR = [], snrFreeR = [], snrHybMrcR = [], rVecKm = [];
+
       const azRad = (azCut * Math.PI) / 180;
 
+
+
       for (let i = 0; i < numR; i++) {
+
         const rVal = rMin + (i / (numR - 1)) * (rMax - rMin);
+
         rVecKm.push(rVal / 1e3);
+
         const tgt = { x: rVal * Math.cos(azRad), y: rVal * Math.sin(azRad), z: tgtH };
 
+
+
         const ptBase = computeTwoRayPoint(tx, rx1, tgt, fc, pol, ground, 0.05);
+
         snrSingleR.push(ptBase.snr_multipath_db);
+
         snrFreeR.push(ptBase.snr_free_db);
 
+
+
         let sumHyb = 0;
+
         for (let f of activeFreqs) {
+
           for (let h of heights) {
+
             sumHyb += computeTwoRayPoint(tx, { x: baseline / 2, y: 0, z: h }, tgt, f, pol, ground, 0.05).snr_lin;
+
           }
+
         }
+
         snrHybMrcR.push(10 * Math.log10(Math.max(sumHyb, 1e-6)));
+
       }
+
       drawRangePlot(rVecKm, snrSingleR, snrFreeR, snrHybMrcR);
 
+
+
       // 3. SPATIAL 2D HEATMAP
+
       if (!document.getElementById('spatialTab').classList.contains('hidden')) {
+
         drawSpatialHeatmap(tx, rx1, fc, pol, ground, tgtH, radius);
+
       }
+
+
 
       // 4. STATISTICAL CDF / CCDF
+
       drawCdfPlot(snrSingleAng, snrFreqMrcAng, snrHybMrcAng);
+
     }
+
+
 
     // --- CANVAS PLOTTING HELPERS ---
+
     function drawAngularPlot(single, freqMrc, hybMrc) {
+
       const cvs = document.getElementById('angularCanvas');
+
       const ctx = cvs.getContext('2d');
+
       const W = cvs.width, H = cvs.height;
+
       ctx.clearRect(0, 0, W, H);
 
+
+
       const pad = { top: 25, bottom: 40, left: 50, right: 25 };
+
       const pW = W - pad.left - pad.right;
+
       const pH = H - pad.top - pad.bottom;
+
+
 
       const minDb = -15, maxDb = 35;
+
       const toY = (db) => pad.top + pH * (1 - (db - minDb) / (maxDb - minDb));
-      const toX = (idx) => pad.left + (idx / 360) * pW;
+
+      const toX = (idx) => pad.left + (idx / 360&deg; pW;
+
+
 
       ctx.strokeStyle = '#334155'; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
+
       for (let db = -10; db <= 30; db += 10) {
+
         const y = toY(db);
+
         ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+
         ctx.fillStyle = '#94a3b8'; ctx.font = '10px monospace'; ctx.fillText(db + ' dB', 12, y + 3);
+
       }
+
       ctx.setLineDash([]);
+
+
 
       const y0 = toY(0);
+
       ctx.strokeStyle = '#64748b'; ctx.lineWidth = 1.5;
+
       ctx.beginPath(); ctx.moveTo(pad.left, y0); ctx.lineTo(W - pad.right, y0); ctx.stroke();
 
+
+
       function plotCurve(data, color, lw) {
+
         ctx.strokeStyle = color; ctx.lineWidth = lw;
+
         ctx.beginPath();
+
         for (let i = 0; i < data.length; i++) {
+
           const x = toX(i);
+
           const y = Math.max(pad.top, Math.min(pad.top + pH, toY(data[i])));
+
           if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+
         }
+
         ctx.stroke();
+
       }
+
+
 
       plotCurve(single, '#ef4444', 1.2);
+
       plotCurve(freqMrc, '#3b82f6', 1.5);
+
       plotCurve(hybMrc, '#34d399', 2.2);
 
-      for (let deg = 0; deg <= 360; deg += 45) {
+
+
+      for (let deg = 0; deg <= 360&deg; deg += 45) {
+
         const x = toX(deg);
-        ctx.fillStyle = '#94a3b8'; ctx.font = '10px sans-serif'; ctx.fillText(deg + '°', x - 8, H - 15);
+
+        ctx.fillStyle = '#94a3b8'; ctx.font = '10px sans-serif'; ctx.fillText(deg + '&deg;', x - 8, H - 15);
+
       }
+
     }
+
+
 
     function drawRangePlot(rKm, single, free, hybMrc) {
+
       const cvs = document.getElementById('rangeCanvas');
+
       const ctx = cvs.getContext('2d');
+
       const W = cvs.width, H = cvs.height;
+
       ctx.clearRect(0, 0, W, H);
+
+
 
       const pad = { top: 25, bottom: 40, left: 50, right: 25 };
+
       const pW = W - pad.left - pad.right;
+
       const pH = H - pad.top - pad.bottom;
+
+
 
       const minDb = -25, maxDb = 45;
+
       const toY = (db) => pad.top + pH * (1 - (db - minDb) / (maxDb - minDb));
+
       const toX = (idx) => pad.left + (idx / (rKm.length - 1)) * pW;
 
+
+
       ctx.strokeStyle = '#334155'; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
+
       for (let db = -20; db <= 40; db += 10) {
+
         const y = toY(db);
+
         ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+
         ctx.fillStyle = '#94a3b8'; ctx.font = '10px monospace'; ctx.fillText(db + ' dB', 10, y + 3);
+
       }
+
       ctx.setLineDash([]);
+
+
 
       function plot(data, color, lw, isDash = false) {
+
         ctx.strokeStyle = color; ctx.lineWidth = lw;
+
         if (isDash) ctx.setLineDash([5, 5]); else ctx.setLineDash([]);
+
         ctx.beginPath();
+
         for (let i = 0; i < data.length; i++) {
+
           const x = toX(i);
+
           const y = Math.max(pad.top, Math.min(pad.top + pH, toY(data[i])));
+
           if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+
         }
+
         ctx.stroke();
+
         ctx.setLineDash([]);
+
       }
+
+
 
       plot(free, '#94a3b8', 1.2, true);
+
       plot(single, '#ef4444', 1.3);
+
       plot(hybMrc, '#34d399', 2.2);
 
+
+
       for (let km = 10; km <= 100; km += 20) {
+
         const idx = Math.floor(((km - 5) / 95) * (rKm.length - 1));
+
         const x = toX(idx);
+
         ctx.fillStyle = '#94a3b8'; ctx.font = '10px sans-serif'; ctx.fillText(km + ' km', x - 12, H - 15);
+
       }
+
     }
+
+
 
     function drawSpatialHeatmap(tx, rx, fc, pol, ground, tgtH, radius) {
+
       const cvs = document.getElementById('spatialCanvas');
+
       const ctx = cvs.getContext('2d');
+
       const W = cvs.width, H = cvs.height;
+
       ctx.clearRect(0, 0, W, H);
+
+
 
       const spanKm = 100;
+
       const res = 110;
+
       const imgData = ctx.createImageData(res, res);
 
+
+
       for (let py = 0; py < res; py++) {
+
         const yKm = (0.5 - py / res) * spanKm;
+
         for (let px = 0; px < res; px++) {
+
           const xKm = (px / res - 0.5) * spanKm;
+
           const tgt = { x: xKm * 1e3, y: yKm * 1e3, z: tgtH };
+
           const pt = computeTwoRayPoint(tx, rx, tgt, fc, pol, ground, 0.05);
 
+
+
           // Color map: -20 dB (deep blue) -> -10 dB (cyan) -> 0 dB (green) -> +6 dB (yellow) -> +12 dB (red)
+
           const norm = Math.max(0, Math.min(1, (pt.f_total_db + 20) / 32));
+
           const idx = (py * res + px) * 4;
+
           
+
           let r = 0, g = 0, b = 0;
+
           if (norm < 0.25) {
+
             // Blue to Cyan
+
             const t = norm / 0.25;
+
             r = Math.floor(30 * (1-t) + 2 * t);
+
             g = Math.floor(58 * (1-t) + 132 * t);
+
             b = Math.floor(138 * (1-t) + 199 * t);
+
           } else if (norm < 0.5) {
+
             // Cyan to Green (0 dB)
+
             const t = (norm - 0.25) / 0.25;
+
             r = Math.floor(2 * (1-t) + 16 * t);
+
             g = Math.floor(132 * (1-t) + 185 * t);
+
             b = Math.floor(199 * (1-t) + 129 * t);
+
           } else if (norm < 0.75) {
+
             // Green to Yellow (+6 dB)
+
             const t = (norm - 0.5) / 0.25;
+
             r = Math.floor(16 * (1-t) + 234 * t);
+
             g = Math.floor(185 * (1-t) + 179 * t);
+
             b = Math.floor(129 * (1-t) + 8 * t);
+
           } else {
+
             // Yellow to Red (+12 dB)
+
             const t = (norm - 0.75) / 0.25;
+
             r = Math.floor(234 * (1-t) + 239 * t);
+
             g = Math.floor(179 * (1-t) + 68 * t);
+
             b = Math.floor(8 * (1-t) + 68 * t);
+
           }
+
           
+
           imgData.data[idx + 0] = r;
+
           imgData.data[idx + 1] = g;
+
           imgData.data[idx + 2] = b;
+
           imgData.data[idx + 3] = 255;
+
         }
+
       }
+
+
 
       const offscreen = document.createElement('canvas');
+
       offscreen.width = res; offscreen.height = res;
+
       offscreen.getContext('2d').putImageData(imgData, 0, 0);
+
       ctx.drawImage(offscreen, 0, 0, W, H);
 
+
+
       const toCanvasX = (km) => W / 2 + (km / spanKm) * W;
+
       const toCanvasY = (km) => H / 2 - (km / spanKm) * H;
 
+
+
       // Draw Orbit Circle
+
       ctx.strokeStyle = '#22d3ee'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
+
       ctx.beginPath();
+
       ctx.arc(toCanvasX(0), toCanvasY(0), (radius / (spanKm * 1e3)) * W, 0, 2*Math.PI);
+
       ctx.stroke();
+
       ctx.setLineDash([]);
+
+
 
       // Baseline line
+
       ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
+
       ctx.beginPath(); ctx.moveTo(toCanvasX(tx.x/1e3), toCanvasY(tx.y/1e3)); ctx.lineTo(toCanvasX(rx.x/1e3), toCanvasY(rx.y/1e3)); ctx.stroke();
+
       ctx.setLineDash([]);
+
+
 
       // Tx Site
+
       ctx.fillStyle = '#facc15'; ctx.beginPath(); ctx.arc(toCanvasX(tx.x/1e3), toCanvasY(tx.y/1e3), 7, 0, 2*Math.PI); ctx.fill();
+
       ctx.strokeStyle = '#000000'; ctx.lineWidth = 1.5; ctx.stroke();
+
       ctx.fillStyle = '#fef08a'; ctx.font = 'bold 11px sans-serif'; ctx.fillText('Tx', toCanvasX(tx.x/1e3) - 7, toCanvasY(tx.y/1e3) - 10);
 
+
+
       // Rx Site
+
       ctx.fillStyle = '#34d399'; ctx.beginPath(); ctx.arc(toCanvasX(rx.x/1e3), toCanvasY(rx.y/1e3), 7, 0, 2*Math.PI); ctx.fill();
+
       ctx.strokeStyle = '#000000'; ctx.lineWidth = 1.5; ctx.stroke();
+
       ctx.fillStyle = '#a7f3d0'; ctx.font = 'bold 11px sans-serif'; ctx.fillText('Rx', toCanvasX(rx.x/1e3) - 7, toCanvasY(rx.y/1e3) - 10);
+
     }
+
+
 
     function drawCdfPlot(single, freqMrc, hybMrc) {
+
       const cvs = document.getElementById('cdfCanvas');
+
       const ctx = cvs.getContext('2d');
+
       const W = cvs.width, H = cvs.height;
+
       ctx.clearRect(0, 0, W, H);
 
+
+
       const isCdf = document.getElementById('cdfRadio').checked;
+
       const pad = { top: 20, bottom: 40, left: 55, right: 25 };
+
       const pW = W - pad.left - pad.right;
+
       const pH = H - pad.top - pad.bottom;
 
+
+
       const thMin = -15, thMax = 35;
+
       const numPts = 100;
 
+
+
       function calcProb(data, th) {
+
         const count = data.filter(v => isCdf ? v <= th : v >= th).length;
+
         return count / data.length;
+
       }
+
+
 
       const toX = (th) => pad.left + ((th - thMin) / (thMax - thMin)) * pW;
+
       const toY = (p) => pad.top + pH * (1 - p);
 
+
+
       ctx.strokeStyle = '#334155'; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
+
       for (let p = 0; p <= 1.0; p += 0.25) {
+
         const y = toY(p);
+
         ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+
         ctx.fillStyle = '#94a3b8'; ctx.font = '10px monospace'; ctx.fillText((p * 100).toFixed(0) + '%', 15, y + 3);
+
       }
+
       ctx.setLineDash([]);
 
+
+
       function plotProb(data, color, lw) {
+
         ctx.strokeStyle = color; ctx.lineWidth = lw;
+
         ctx.beginPath();
+
         for (let i = 0; i < numPts; i++) {
+
           const th = thMin + (i / (numPts - 1)) * (thMax - thMin);
+
           const p = calcProb(data, th);
+
           const x = toX(th);
+
           const y = toY(p);
+
           if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+
         }
+
         ctx.stroke();
+
       }
+
+
 
       plotProb(single, '#ef4444', 1.5);
+
       plotProb(freqMrc, '#3b82f6', 1.8);
+
       plotProb(hybMrc, '#34d399', 2.4);
 
+
+
       for (let th = -10; th <= 30; th += 10) {
+
         const x = toX(th);
+
         ctx.fillStyle = '#94a3b8'; ctx.font = '10px sans-serif'; ctx.fillText(th + ' dB', x - 12, H - 15);
+
       }
+
     }
 
+
+
     // Attach Event Listeners
+
     const inputs = ['fcInput', 'htInput', 'hr1Input', 'hr2Input', 'baseInput', 'tgtHInput', 'radiusInput', 'azCutInput', 'polSelect', 'groundSelect', 'f1Check', 'f2Check', 'f3Check', 'f4Check', 'f5Check'];
+
     inputs.forEach(id => {
+
       const el = document.getElementById(id);
+
       if (el) el.addEventListener('input', updateAll);
+
     });
+
+
 
     document.getElementById('resetBtn').addEventListener('click', () => {
+
       document.getElementById('fcInput').value = 98;
+
       document.getElementById('htInput').value = 120;
+
       document.getElementById('hr1Input').value = 12;
+
       document.getElementById('hr2Input').value = 22;
+
       document.getElementById('baseInput').value = 40;
+
       document.getElementById('tgtHInput').value = 2500;
+
       document.getElementById('radiusInput').value = 45;
+
       document.getElementById('azCutInput').value = 90;
+
       document.getElementById('polSelect').value = 'vertical';
+
       document.getElementById('groundSelect').value = 'medium';
+
       document.getElementById('f1Check').checked = true;
+
       document.getElementById('f2Check').checked = false;
+
       document.getElementById('f3Check').checked = true;
+
       document.getElementById('f4Check').checked = false;
+
       document.getElementById('f5Check').checked = true;
+
       updateAll();
+
     });
 
+
+
     // Initial load
+
     updateAll();
+
   </script>
+
 </body>
+
 </html>
+
