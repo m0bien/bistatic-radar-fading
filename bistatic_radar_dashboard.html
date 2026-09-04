@@ -338,13 +338,13 @@
 
         <div class="flex border-b border-slate-800 text-sm gap-6 pb-2 overflow-x-auto">
 
-          <button class="tab-btn active transition py-1" onclick="switchTab('angularTab')">1. Angular Fading (360&deg; deg;)</button>
+          <button class="tab-btn active transition py-1" onclick="switchTab(this, 'angularTab')">1. Angular Fading (360&deg; deg;)</button>
 
-          <button class="tab-btn text-slate-400 hover:text-slate-200 transition py-1" onclick="switchTab('rangeTab')">2. Range Fading (5 to 100 km)</button>
+          <button class="tab-btn text-slate-400 hover:text-slate-200 transition py-1" onclick="switchTab(this, 'rangeTab')">2. Range Fading (5 to 100 km)</button>
 
-          <button class="tab-btn text-slate-400 hover:text-slate-200 transition py-1" onclick="switchTab('spatialTab')">3. 2D Spatial Heatmap</button>
+          <button class="tab-btn text-slate-400 hover:text-slate-200 transition py-1" onclick="switchTab(this, 'spatialTab')">3. 2D Spatial Heatmap</button>
 
-          <button class="tab-btn text-slate-400 hover:text-slate-200 transition py-1" onclick="switchTab('statsTab')">4. Outage &amp; Coverage CDF</button>
+          <button class="tab-btn text-slate-400 hover:text-slate-200 transition py-1" onclick="switchTab(this, 'statsTab')">4. Outage &amp; Coverage CDF</button>
 
         </div>
 
@@ -696,18 +696,21 @@
 
 
 
-    function switchTab(tabId) {
-
+    function switchTab(btnEl, tabId) {
       document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
-
-      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-
-      document.getElementById(tabId).classList.remove('hidden');
-
-      event.target.classList.add('active');
-
+      document.querySelectorAll('.tab-btn').forEach(el => {
+        el.classList.remove('active');
+        el.classList.add('text-slate-400');
+      });
+      const target = document.getElementById(tabId);
+      if (target) {
+        target.classList.remove('hidden');
+      }
+      if (btnEl) {
+        btnEl.classList.add('active');
+        btnEl.classList.remove('text-slate-400');
+      }
       updateAll();
-
     }
 
 
