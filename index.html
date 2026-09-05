@@ -6,12 +6,52 @@
   <title>Bistatic Radar Two-Ray Fading &amp; 3D Joint Diversity Simulator</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    input[type=range] { accent-color: #3b82f6; }
-    .tab-btn.active { border-bottom: 2px solid #3b82f6; color: #60a5fa; font-weight: 600; }
-    .tab-btn { transition: all 0.2s; }
+    /* Standalone Fallback & Modern UI Styles */
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      margin: 0;
+      padding: 16px;
+    }
+    input[type=range] { accent-color: #3b82f6; cursor: pointer; }
+    .tab-btn {
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #94a3b8;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { color: #f1f5f9; }
+    .tab-btn.active {
+      color: #60a5fa;
+      border-bottom: 2px solid #3b82f6;
+      font-weight: 700;
+    }
+    .hidden { display: none !important; }
+    canvas { display: block; max-width: 100%; height: auto; }
+    .card-panel {
+      background-color: rgba(30, 41, 59, 0.85);
+      border: 1px solid rgba(51, 65, 85, 0.7);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+    .stat-badge {
+      background-color: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(51, 65, 85, 0.6);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+    }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-4 sm:p-6 font-sans antialiased">
+<body class="min-h-screen p-3 sm:p-6 antialiased">
   <div class="max-w-7xl mx-auto space-y-6">
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-800 pb-4 gap-4">
@@ -20,7 +60,7 @@
           Bistatic Radar Two-Ray Multipath &amp; 3D Joint Diversity Simulator
         </h1>
         <p class="text-slate-400 text-sm mt-1">
-          Physics-accurate 3D ground multipath with decoupled Angular/Range fading, <strong>Tx &times; Rx &times; Freq Diversity</strong>, and <strong>P<sub>d</sub> / P<sub>fa</sub> ROC analysis</strong>.
+          Physics-accurate 3D ground multipath, decoupled Angular/Range fading, <strong>Tx &times; Rx &times; Freq Diversity</strong>, and <strong>P<sub>d</sub> / P<sub>fa</sub> ROC analysis</strong>.
         </p>
       </div>
       <div class="flex items-center gap-3">
@@ -36,8 +76,8 @@
     <!-- Main Grid: Controls Left, Visualizations Right -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       <!-- CONTROLS SIDEBAR (4 cols) -->
-      <div class="lg:col-span-4 bg-slate-800/80 border border-slate-700/60 rounded-2xl p-5 space-y-4 h-fit shadow-xl">
-        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400 border-b border-slate-700/50 pb-2">
+      <div class="lg:col-span-4 card-panel space-y-4 h-fit">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-700/50 pb-2">
           System &amp; Geometric Parameters
         </h2>
 
@@ -48,11 +88,11 @@
               <span>Carrier Frequency:</span>
               <span id="fcVal" class="text-blue-400 font-mono">98.0 MHz</span>
             </div>
-            <input id="fcInput" type="range" min="88" max="108" step="0.5" value="98" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer mt-1">
+            <input id="fcInput" type="range" min="88" max="108" step="0.5" value="98" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none mt-1">
           </div>
 
           <!-- Dual Tx Antenna Heights -->
-          <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/50 space-y-2">
+          <div class="bg-slate-900/70 p-2.5 rounded-xl border border-slate-700/50 space-y-2">
             <span class="text-xs font-semibold text-indigo-300 block">Transmitter Height Diversity (Tx Mast Bays)</span>
             <div class="grid grid-cols-2 gap-2">
               <div>
@@ -60,14 +100,14 @@
                   <span>Tx Bay 1 (h<sub>t1</sub>):</span>
                   <span id="ht1Val" class="text-indigo-400 font-mono">120 m</span>
                 </div>
-                <input id="ht1Input" type="range" min="20" max="300" step="5" value="120" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer mt-1">
+                <input id="ht1Input" type="range" min="20" max="300" step="5" value="120" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none mt-1">
               </div>
               <div>
                 <div class="flex justify-between text-[11px] font-medium">
                   <span>Tx Bay 2 (h<sub>t2</sub>):</span>
                   <span id="ht2Val" class="text-indigo-400 font-mono">180 m</span>
                 </div>
-                <input id="ht2Input" type="range" min="20" max="300" step="5" value="180" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer mt-1">
+                <input id="ht2Input" type="range" min="20" max="300" step="5" value="180" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none mt-1">
               </div>
             </div>
             <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer pt-1">
@@ -77,7 +117,7 @@
           </div>
 
           <!-- Dual Rx Antenna Heights -->
-          <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/50 space-y-2">
+          <div class="bg-slate-900/70 p-2.5 rounded-xl border border-slate-700/50 space-y-2">
             <span class="text-xs font-semibold text-emerald-300 block">Receiver Height Diversity (Rx Mast Antennas)</span>
             <div class="grid grid-cols-2 gap-2">
               <div>
@@ -85,14 +125,14 @@
                   <span>Rx Mast 1 (h<sub>r1</sub>):</span>
                   <span id="hr1Val" class="text-emerald-400 font-mono">12 m</span>
                 </div>
-                <input id="hr1Input" type="range" min="5" max="50" step="1" value="12" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer mt-1">
+                <input id="hr1Input" type="range" min="5" max="50" step="1" value="12" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none mt-1">
               </div>
               <div>
                 <div class="flex justify-between text-[11px] font-medium">
                   <span>Rx Mast 2 (h<sub>r2</sub>):</span>
                   <span id="hr2Val" class="text-emerald-400 font-mono">22 m</span>
                 </div>
-                <input id="hr2Input" type="range" min="5" max="50" step="1" value="22" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer mt-1">
+                <input id="hr2Input" type="range" min="5" max="50" step="1" value="22" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none mt-1">
               </div>
             </div>
             <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer pt-1">
@@ -106,7 +146,7 @@
               <span>Bistatic Baseline (L):</span>
               <span id="baseVal" class="text-blue-400 font-mono">40 km</span>
             </div>
-            <input id="baseInput" type="range" min="10" max="120" step="5" value="40" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer mt-1">
+            <input id="baseInput" type="range" min="10" max="120" step="5" value="40" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none mt-1">
           </div>
 
           <div>
@@ -114,7 +154,7 @@
               <span>Target Altitude (z<sub>t</sub>):</span>
               <span id="tgtHVal" class="text-blue-400 font-mono">2500 m</span>
             </div>
-            <input id="tgtHInput" type="range" min="500" max="10000" step="250" value="2500" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer mt-1">
+            <input id="tgtHInput" type="range" min="500" max="10000" step="250" value="2500" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none mt-1">
           </div>
 
           <div>
@@ -122,7 +162,7 @@
               <span>Target Orbit Radius (R):</span>
               <span id="radiusVal" class="text-blue-400 font-mono">45 km</span>
             </div>
-            <input id="radiusInput" type="range" min="15" max="120" step="5" value="45" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer mt-1">
+            <input id="radiusInput" type="range" min="15" max="120" step="5" value="45" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none mt-1">
           </div>
 
           <div>
@@ -130,12 +170,12 @@
               <span>Range Cut Azimuth (&theta;):</span>
               <span id="azCutVal" class="text-blue-400 font-mono">90&deg;</span>
             </div>
-            <input id="azCutInput" type="range" min="0" max="360" step="5" value="90" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer mt-1">
+            <input id="azCutInput" type="range" min="0" max="360" step="5" value="90" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none mt-1">
           </div>
         </div>
 
-        <!-- Detection & Pfa Controls -->
-        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400 border-b border-slate-700/50 pb-2 pt-1">
+        <!-- Detection Pfa Parameter -->
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-700/50 pb-2 pt-1">
           Detection Parameters (P<sub>fa</sub> &amp; Threshold)
         </h2>
         <div>
@@ -143,64 +183,87 @@
             <span>False Alarm Probability (P<sub>fa</sub>):</span>
             <span id="pfaVal" class="text-amber-400 font-mono">1.0 &times; 10<sup>-6</sup></span>
           </div>
-          <input id="pfaExpInput" type="range" min="2" max="8" step="0.5" value="6" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer mt-1">
+          <input id="pfaExpInput" type="range" min="2" max="8" step="0.5" value="6" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none mt-1">
+        </div>
+
+        <!-- Surface Properties -->
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-700/50 pb-2 pt-1">
+          Surface &amp; Polarization
+        </h2>
+        <div class="grid grid-cols-2 gap-3 text-xs">
+          <div>
+            <label class="block text-slate-400 mb-1">Polarization</label>
+            <select id="polSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200">
+              <option value="vertical" selected>Vertical (TM)</option>
+              <option value="horizontal">Horizontal (TE)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Ground Type</label>
+            <select id="groundSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200">
+              <option value="medium" selected>Medium Dry Ground</option>
+              <option value="wet">Wet Ground</option>
+              <option value="seawater">Sea Water</option>
+              <option value="freshwater">Fresh Water</option>
+            </select>
+          </div>
         </div>
 
         <!-- FM Diversity Channels Selection -->
-        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400 border-b border-slate-700/50 pb-2 pt-1">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-700/50 pb-2 pt-1">
           FM Diversity Channels (88 &ndash; 108 MHz)
         </h2>
         <div class="grid grid-cols-2 gap-2 text-xs">
-          <label class="flex items-center gap-2 bg-slate-900/60 p-2 rounded-lg border border-slate-700/40 cursor-pointer">
+          <label class="flex items-center gap-2 bg-slate-900/70 p-2 rounded-lg border border-slate-700/40 cursor-pointer">
             <input type="checkbox" id="f1Check" checked class="rounded bg-slate-800 text-blue-500">
             <span>f<sub>1</sub>: 88.5 MHz</span>
           </label>
-          <label class="flex items-center gap-2 bg-slate-900/60 p-2 rounded-lg border border-slate-700/40 cursor-pointer">
+          <label class="flex items-center gap-2 bg-slate-900/70 p-2 rounded-lg border border-slate-700/40 cursor-pointer">
             <input type="checkbox" id="f2Check" class="rounded bg-slate-800 text-blue-500">
             <span>f<sub>2</sub>: 93.0 MHz</span>
           </label>
-          <label class="flex items-center gap-2 bg-slate-900/60 p-2 rounded-lg border border-slate-700/40 cursor-pointer">
+          <label class="flex items-center gap-2 bg-slate-900/70 p-2 rounded-lg border border-slate-700/40 cursor-pointer">
             <input type="checkbox" id="f3Check" checked class="rounded bg-slate-800 text-blue-500">
             <span>f<sub>3</sub>: 98.0 MHz</span>
           </label>
-          <label class="flex items-center gap-2 bg-slate-900/60 p-2 rounded-lg border border-slate-700/40 cursor-pointer">
+          <label class="flex items-center gap-2 bg-slate-900/70 p-2 rounded-lg border border-slate-700/40 cursor-pointer">
             <input type="checkbox" id="f4Check" class="rounded bg-slate-800 text-blue-500">
             <span>f<sub>4</sub>: 103.0 MHz</span>
           </label>
-          <label class="flex items-center gap-2 bg-slate-900/60 p-2 rounded-lg border border-slate-700/40 cursor-pointer col-span-2">
+          <label class="flex items-center gap-2 bg-slate-900/70 p-2 rounded-lg border border-slate-700/40 cursor-pointer col-span-2">
             <input type="checkbox" id="f5Check" checked class="rounded bg-slate-800 text-blue-500">
             <span>f<sub>5</sub>: 107.5 MHz</span>
           </label>
         </div>
-        <div class="bg-blue-950/40 border border-blue-800/40 rounded-xl p-3 text-xs text-blue-300">
+        <div class="bg-blue-950/50 border border-blue-800/40 rounded-xl p-3 text-xs text-blue-300">
           <p class="font-semibold text-sm" id="totalBranchesLabel">12 Diversity Branches (3 Freqs &times; 2 Tx &times; 2 Rx)</p>
-          <p class="text-[11px] text-slate-400 mt-0.5">MRC combiner: &gamma;<sub>total</sub> = &sum; &gamma;<sub>i</sub> (M<sub>f</sub> &times; M<sub>s,t</sub> &times; M<sub>s,r</sub>)</p>
+          <p class="text-[11px] text-slate-400 mt-0.5">MRC Combiner: &gamma;<sub>total</sub> = &sum; &gamma;<sub>i</sub> (M<sub>f</sub> &times; M<sub>s,t</sub> &times; M<sub>s,r</sub>)</p>
         </div>
       </div>
 
       <!-- VISUALIZATIONS & TABS (8 cols) -->
       <div class="lg:col-span-8 flex flex-col space-y-4">
         <!-- Tab Navigation -->
-        <div class="flex border-b border-slate-800 gap-2 overflow-x-auto pb-1 text-sm font-medium">
-          <button id="btn-angularTab" onclick="showTab('angularTab')" class="tab-btn active px-3 py-2 text-blue-400">
+        <div class="flex border-b border-slate-800 gap-1 overflow-x-auto pb-1 text-sm font-medium">
+          <button id="btn-angularTab" onclick="showTab('angularTab')" class="tab-btn active">
             Angular Fading
           </button>
-          <button id="btn-rangeTab" onclick="showTab('rangeTab')" class="tab-btn px-3 py-2 text-slate-400 hover:text-slate-200">
+          <button id="btn-rangeTab" onclick="showTab('rangeTab')" class="tab-btn">
             Range Fading
           </button>
-          <button id="btn-spatialTab" onclick="showTab('spatialTab')" class="tab-btn px-3 py-2 text-slate-400 hover:text-slate-200">
+          <button id="btn-spatialTab" onclick="showTab('spatialTab')" class="tab-btn">
             2D Spatial Map
           </button>
-          <button id="btn-statsTab" onclick="showTab('statsTab')" class="tab-btn px-3 py-2 text-slate-400 hover:text-slate-200">
+          <button id="btn-statsTab" onclick="showTab('statsTab')" class="tab-btn">
             Outage CDF
           </button>
-          <button id="btn-pdTab" onclick="showTab('pdTab')" class="tab-btn px-3 py-2 text-slate-400 hover:text-slate-200 font-semibold text-emerald-400">
+          <button id="btn-pdTab" onclick="showTab('pdTab')" class="tab-btn text-emerald-400 font-semibold">
             P<sub>d</sub> &amp; ROC Curves
           </button>
         </div>
 
         <!-- TAB 1: Angular Fading -->
-        <div id="angularTab" class="tab-content bg-slate-800/80 border border-slate-700/60 rounded-2xl p-5 shadow-xl space-y-4">
+        <div id="angularTab" class="tab-content card-panel space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <h3 class="font-bold text-slate-200">Bistatic Multipath Fading vs. Target Azimuth (&theta;)</h3>
@@ -217,15 +280,15 @@
             <canvas id="angularCanvas" width="700" height="320" class="w-full h-auto block"></canvas>
           </div>
           <div class="grid grid-cols-3 gap-3 text-center">
-            <div class="bg-slate-900/80 border border-slate-700/50 p-3 rounded-xl">
+            <div class="stat-badge">
               <span class="text-xs text-slate-400 block">Single Ch 5th-% SNR</span>
               <span id="p5SingleAng" class="text-lg font-bold font-mono text-red-400">-17.6 dB</span>
             </div>
-            <div class="bg-slate-900/80 border border-slate-700/50 p-3 rounded-xl">
+            <div class="stat-badge">
               <span class="text-xs text-slate-400 block">3D Hybrid MRC 5th-% SNR</span>
               <span id="p5HybAng" class="text-lg font-bold font-mono text-emerald-400">+3.1 dB</span>
             </div>
-            <div class="bg-slate-900/80 border border-slate-700/50 p-3 rounded-xl">
+            <div class="stat-badge">
               <span class="text-xs text-slate-400 block">Net Diversity Gain</span>
               <span id="gainAng" class="text-lg font-bold font-mono text-teal-300">+20.7 dB</span>
             </div>
@@ -233,7 +296,7 @@
         </div>
 
         <!-- TAB 2: Radial Range Fading -->
-        <div id="rangeTab" class="tab-content hidden bg-slate-800/80 border border-slate-700/60 rounded-2xl p-5 shadow-xl space-y-4">
+        <div id="rangeTab" class="tab-content hidden card-panel space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <h3 class="font-bold text-slate-200">Radial Range Fading &amp; 1/R<sup>4</sup> Roll-Off</h3>
@@ -254,7 +317,7 @@
         </div>
 
         <!-- TAB 3: 2D Spatial Heatmap -->
-        <div id="spatialTab" class="tab-content hidden bg-slate-800/80 border border-slate-700/60 rounded-2xl p-5 shadow-xl space-y-4">
+        <div id="spatialTab" class="tab-content hidden card-panel space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <h3 class="font-bold text-slate-200">2D Spatial Fading Distribution &amp; Geometry</h3>
@@ -285,7 +348,7 @@
         </div>
 
         <!-- TAB 4: Statistical Diversity Outage CDF / CCDF -->
-        <div id="statsTab" class="tab-content hidden bg-slate-800/80 border border-slate-700/60 rounded-2xl p-5 shadow-xl space-y-4">
+        <div id="statsTab" class="tab-content hidden card-panel space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <h3 class="font-bold text-slate-200">Diversity Performance &amp; Outage Probability</h3>
@@ -311,7 +374,7 @@
         </div>
 
         <!-- TAB 5: Detection Pd and ROC Curves -->
-        <div id="pdTab" class="tab-content hidden bg-slate-800/80 border border-slate-700/60 rounded-2xl p-5 shadow-xl space-y-4">
+        <div id="pdTab" class="tab-content hidden card-panel space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <h3 class="font-bold text-slate-200">Probability of Detection (P<sub>d</sub>) &amp; ROC Curve Improvement</h3>
@@ -326,15 +389,15 @@
             <canvas id="pdCanvas" width="700" height="320" class="w-full h-auto block"></canvas>
           </div>
           <div class="grid grid-cols-3 gap-3 text-center">
-            <div class="bg-slate-900/80 border border-slate-700/50 p-3 rounded-xl">
+            <div class="stat-badge">
               <span class="text-xs text-slate-400 block">Single Ch Spatial Coverage P<sub>d</sub></span>
               <span id="meanPdSingle" class="text-lg font-bold font-mono text-red-400">42.5%</span>
             </div>
-            <div class="bg-slate-900/80 border border-slate-700/50 p-3 rounded-xl">
+            <div class="stat-badge">
               <span class="text-xs text-slate-400 block">3D Hybrid Spatial Coverage P<sub>d</sub></span>
               <span id="meanPdHyb" class="text-lg font-bold font-mono text-emerald-400">99.9%</span>
             </div>
-            <div class="bg-slate-900/80 border border-slate-700/50 p-3 rounded-xl">
+            <div class="stat-badge">
               <span class="text-xs text-slate-400 block">Fading SNR Penalty Saved</span>
               <span id="fadingSaved" class="text-lg font-bold font-mono text-teal-300">+11.4 dB</span>
             </div>
@@ -366,16 +429,16 @@
         if (el && btn) {
           if (id === tabId) {
             el.classList.remove('hidden');
-            btn.classList.add('active', 'text-blue-400');
-            btn.classList.remove('text-slate-400');
+            el.style.display = 'block';
+            btn.classList.add('active');
           } else {
             el.classList.add('hidden');
-            btn.classList.remove('active', 'text-blue-400');
-            btn.classList.add('text-slate-400');
+            el.style.display = 'none';
+            btn.classList.remove('active');
           }
         }
       });
-      updateAll();
+      setTimeout(updateAll, 10);
     }
 
     function computeFresnelReflection(psi, freq, pol, groundType, roughness) {
@@ -465,195 +528,195 @@
       };
     }
 
-    // --- DETECTION PD FORMULAS ---
     function calcPdRayleigh(snrLin, pfa) {
-      const th = -Math.log(Math.max(pfa, 1e-15));
-      return Math.pow(pfa, 1.0 / (1.0 + Math.max(snrLin, 1e-6)));
+      const s = Math.max(0, snrLin);
+      const pf = Math.max(1e-15, Math.min(0.999, pfa));
+      return Math.pow(pf, 1.0 / (1.0 + s));
     }
 
     function calcPdMrc(branchSnrs, pfa) {
-      const th = -Math.log(Math.max(pfa, 1e-15));
-      const M = branchSnrs.length;
-      const totalSnr = branchSnrs.reduce((a, b) => a + b, 0);
+      const pf = Math.max(1e-15, Math.min(0.999, pfa));
+      const th = -Math.log(pf);
+      const M = Math.max(1, branchSnrs.length);
+      const totalSnr = branchSnrs.reduce((a, b) => a + Math.max(0, b), 0);
       const snrAvg = totalSnr / M;
-      const x = th / (1.0 + Math.max(snrAvg, 1e-6));
+      const x = th / (1.0 + snrAvg);
       let sum = 0, term = 1;
       for (let k = 0; k < M; k++) {
         if (k > 0) term *= (x / k);
         sum += term;
       }
-      return Math.min(1.0, Math.max(pfa, Math.exp(-x) * sum));
+      const pd = Math.exp(-x) * sum;
+      return Math.min(1.0, Math.max(pf, isNaN(pd) ? pf : pd));
     }
 
-    // --- MASTER UPDATE FUNCTION ---
     function updateAll() {
-      const fc = parseFloat(document.getElementById('fcInput').value) * 1e6;
-      const ht1 = parseFloat(document.getElementById('ht1Input').value);
-      const ht2 = parseFloat(document.getElementById('ht2Input').value);
-      const hr1 = parseFloat(document.getElementById('hr1Input').value);
-      const hr2 = parseFloat(document.getElementById('hr2Input').value);
-      const baseline = parseFloat(document.getElementById('baseInput').value) * 1e3;
-      const tgtH = parseFloat(document.getElementById('tgtHInput').value);
-      const radius = parseFloat(document.getElementById('radiusInput').value) * 1e3;
-      const azCut = parseFloat(document.getElementById('azCutInput').value);
-      const pol = document.getElementById('polSelect').value;
-      const ground = document.getElementById('groundSelect').value;
+      try {
+        const fcEl = document.getElementById('fcInput');
+        if (!fcEl) return;
+        const fc = parseFloat(fcEl.value) * 1e6;
+        const ht1 = parseFloat(document.getElementById('ht1Input').value);
+        const ht2 = parseFloat(document.getElementById('ht2Input').value);
+        const hr1 = parseFloat(document.getElementById('hr1Input').value);
+        const hr2 = parseFloat(document.getElementById('hr2Input').value);
+        const baseline = parseFloat(document.getElementById('baseInput').value) * 1e3;
+        const tgtH = parseFloat(document.getElementById('tgtHInput').value);
+        const radius = parseFloat(document.getElementById('radiusInput').value) * 1e3;
+        const azCut = parseFloat(document.getElementById('azCutInput').value);
+        const pol = document.getElementById('polSelect').value;
+        const ground = document.getElementById('groundSelect').value;
 
-      const pfaExp = parseFloat(document.getElementById('pfaExpInput').value);
-      const pfa = Math.pow(10, -pfaExp);
-      const gammaThDb = 10 * Math.log10(-Math.log(pfa));
+        const pfaExp = parseFloat(document.getElementById('pfaExpInput').value);
+        const pfa = Math.pow(10, -pfaExp);
+        const gammaThDb = 10 * Math.log10(-Math.log(pfa));
 
-      const enableTxDiv = document.getElementById('txDivCheck').checked;
-      const enableRxDiv = document.getElementById('rxDivCheck').checked;
+        const enableTxDiv = document.getElementById('txDivCheck').checked;
+        const enableRxDiv = document.getElementById('rxDivCheck').checked;
 
-      // Update Labels
-      document.getElementById('fcVal').innerText = (fc / 1e6).toFixed(1) + ' MHz';
-      document.getElementById('ht1Val').innerText = ht1 + ' m';
-      document.getElementById('ht2Val').innerText = ht2 + ' m';
-      document.getElementById('hr1Val').innerText = hr1 + ' m';
-      document.getElementById('hr2Val').innerText = hr2 + ' m';
-      document.getElementById('baseVal').innerText = (baseline / 1e3).toFixed(0) + ' km';
-      document.getElementById('tgtHVal').innerText = tgtH + ' m';
-      document.getElementById('radiusVal').innerText = (radius / 1e3).toFixed(0) + ' km';
-      document.getElementById('azCutVal').innerText = azCut + '\u00B0';
+        // Labels
+        document.getElementById('fcVal').innerText = (fc / 1e6).toFixed(1) + ' MHz';
+        document.getElementById('ht1Val').innerText = ht1 + ' m';
+        document.getElementById('ht2Val').innerText = ht2 + ' m';
+        document.getElementById('hr1Val').innerText = hr1 + ' m';
+        document.getElementById('hr2Val').innerText = hr2 + ' m';
+        document.getElementById('baseVal').innerText = (baseline / 1e3).toFixed(0) + ' km';
+        document.getElementById('tgtHVal').innerText = tgtH + ' m';
+        document.getElementById('radiusVal').innerText = (radius / 1e3).toFixed(0) + ' km';
+        document.getElementById('azCutVal').innerText = azCut + '\u00B0';
 
-      document.getElementById('pfaVal').innerHTML = `1.0 &times; 10<sup>-${pfaExp.toFixed(1)}</sup>`;
-      document.getElementById('lblPfaPd').innerHTML = `1.0 &times; 10<sup>-${pfaExp.toFixed(1)}</sup>`;
-      document.getElementById('lblThreshPd').innerText = gammaThDb.toFixed(1) + ' dB';
+        document.getElementById('pfaVal').innerHTML = `1.0 &times; 10<sup>-${pfaExp.toFixed(1)}</sup>`;
+        document.getElementById('lblPfaPd').innerHTML = `1.0 &times; 10<sup>-${pfaExp.toFixed(1)}</sup>`;
+        document.getElementById('lblThreshPd').innerText = gammaThDb.toFixed(1) + ' dB';
 
-      document.getElementById('lblRadiusAng').innerText = (radius / 1e3).toFixed(0) + ' km';
-      document.getElementById('lblTgtHAng').innerText = tgtH + ' m';
-      document.getElementById('lblAzCutR').innerText = azCut + '\u00B0';
-      document.getElementById('lblTgtHSpatial').innerText = tgtH + ' m';
+        document.getElementById('lblRadiusAng').innerText = (radius / 1e3).toFixed(0) + ' km';
+        document.getElementById('lblTgtHAng').innerText = tgtH + ' m';
+        document.getElementById('lblAzCutR').innerText = azCut + '\u00B0';
+        document.getElementById('lblTgtHSpatial').innerText = tgtH + ' m';
 
-      const activeFreqs = [];
-      if (document.getElementById('f1Check').checked) activeFreqs.push(88.5e6);
-      if (document.getElementById('f2Check').checked) activeFreqs.push(93.0e6);
-      if (document.getElementById('f3Check').checked) activeFreqs.push(98.0e6);
-      if (document.getElementById('f4Check').checked) activeFreqs.push(103.0e6);
-      if (document.getElementById('f5Check').checked) activeFreqs.push(107.5e6);
-      if (activeFreqs.length === 0) activeFreqs.push(fc);
+        const activeFreqs = [];
+        if (document.getElementById('f1Check').checked) activeFreqs.push(88.5e6);
+        if (document.getElementById('f2Check').checked) activeFreqs.push(93.0e6);
+        if (document.getElementById('f3Check').checked) activeFreqs.push(98.0e6);
+        if (document.getElementById('f4Check').checked) activeFreqs.push(103.0e6);
+        if (document.getElementById('f5Check').checked) activeFreqs.push(107.5e6);
+        if (activeFreqs.length === 0) activeFreqs.push(fc);
 
-      const txHeights = enableTxDiv ? [ht1, ht2] : [ht1];
-      const rxHeights = enableRxDiv ? [hr1, hr2] : [hr1];
-      const totalBranches = activeFreqs.length * txHeights.length * rxHeights.length;
-      document.getElementById('totalBranchesLabel').innerText = `${totalBranches} Diversity Branches (${activeFreqs.length} Freqs \u00D7 ${txHeights.length} Tx \u00D7 ${rxHeights.length} Rx)`;
+        const txHeights = enableTxDiv ? [ht1, ht2] : [ht1];
+        const rxHeights = enableRxDiv ? [hr1, hr2] : [hr1];
+        const totalBranches = activeFreqs.length * txHeights.length * rxHeights.length;
+        document.getElementById('totalBranchesLabel').innerText = `${totalBranches} Diversity Branches (${activeFreqs.length} Freqs \u00D7 ${txHeights.length} Tx \u00D7 ${rxHeights.length} Rx)`;
 
-      const tx1 = { x: -baseline / 2, y: 0, z: ht1 };
-      const rx1 = { x: baseline / 2, y: 0, z: hr1 };
+        const tx1 = { x: -baseline / 2, y: 0, z: ht1 };
+        const rx1 = { x: baseline / 2, y: 0, z: hr1 };
 
-      // 1. ANGULAR SWEEP (360 points)
-      const numAng = 360;
-      const snrSingleAng = [];
-      const snrMimoAng = [];
-      const snrFreqMrcAng = [];
-      const snr3dMrcAng = [];
+        // 1. ANGULAR SWEEP (360 points)
+        const numAng = 360;
+        const snrSingleAng = [];
+        const snrMimoAng = [];
+        const snrFreqMrcAng = [];
+        const snr3dMrcAng = [];
 
-      const pdSingleAng = [];
-      const pd3dMrcAng = [];
+        const pdSingleAng = [];
+        const pd3dMrcAng = [];
 
-      for (let a = 0; a < numAng; a++) {
-        const rad = (a * Math.PI) / 180;
-        const tgt = { x: radius * Math.cos(rad), y: radius * Math.sin(rad), z: tgtH };
+        for (let a = 0; a < numAng; a++) {
+          const rad = (a * Math.PI) / 180;
+          const tgt = { x: radius * Math.cos(rad), y: radius * Math.sin(rad), z: tgtH };
 
-        // Single Channel (Tx1, Rx1, fc)
-        const ptSingle = computeTwoRayPoint(tx1, rx1, tgt, fc, pol, ground, 0.05);
-        snrSingleAng.push(ptSingle.snr_multipath_db);
+          const ptSingle = computeTwoRayPoint(tx1, rx1, tgt, fc, pol, ground, 0.05);
+          snrSingleAng.push(ptSingle.snr_multipath_db);
 
-        // Scaled SNR for Pd representation (assuming 15 dB nominal mean)
-        const snrSingleScaledLin = ptSingle.snr_lin * 50.0;
-        pdSingleAng.push(calcPdRayleigh(snrSingleScaledLin, pfa));
+          const snrSingleScaledLin = ptSingle.snr_lin * 50.0;
+          pdSingleAng.push(calcPdRayleigh(snrSingleScaledLin, pfa));
 
-        // Spatial MIMO (All Tx x All Rx at fc)
-        let sumMimoLin = 0;
-        for (let ht of txHeights) {
-          for (let hr of rxHeights) {
-            sumMimoLin += computeTwoRayPoint({ x: -baseline/2, y: 0, z: ht }, { x: baseline/2, y: 0, z: hr }, tgt, fc, pol, ground, 0.05).snr_lin;
-          }
-        }
-        snrMimoAng.push(10 * Math.log10(Math.max(sumMimoLin, 1e-6)));
-
-        // Frequency Diversity MRC (Tx1, Rx1, all freqs)
-        let sumFreqLin = 0;
-        for (let f of activeFreqs) {
-          sumFreqLin += computeTwoRayPoint(tx1, rx1, tgt, f, pol, ground, 0.05).snr_lin;
-        }
-        snrFreqMrcAng.push(10 * Math.log10(Math.max(sumFreqLin, 1e-6)));
-
-        // 3D Hybrid MRC (All Tx x All Rx x All freqs)
-        const branchSnrsLin = [];
-        let sum3dLin = 0;
-        for (let ht of txHeights) {
-          for (let hr of rxHeights) {
-            for (let f of activeFreqs) {
-              const pt = computeTwoRayPoint({ x: -baseline/2, y: 0, z: ht }, { x: baseline/2, y: 0, z: hr }, tgt, f, pol, ground, 0.05);
-              branchSnrsLin.push(pt.snr_lin * 50.0);
-              sum3dLin += pt.snr_lin;
+          let sumMimoLin = 0;
+          for (let ht of txHeights) {
+            for (let hr of rxHeights) {
+              sumMimoLin += computeTwoRayPoint({ x: -baseline/2, y: 0, z: ht }, { x: baseline/2, y: 0, z: hr }, tgt, fc, pol, ground, 0.05).snr_lin;
             }
           }
-        }
-        snr3dMrcAng.push(10 * Math.log10(Math.max(sum3dLin, 1e-6)));
-        pd3dMrcAng.push(calcPdMrc(branchSnrsLin, pfa));
-      }
+          snrMimoAng.push(10 * Math.log10(Math.max(sumMimoLin, 1e-6)));
 
-      // 5th percentile stats
-      const sortedSingle = [...snrSingleAng].sort((a, b) => a - b);
-      const sortedHyb = [...snr3dMrcAng].sort((a, b) => a - b);
-      const p5S = sortedSingle[Math.floor(numAng * 0.05)];
-      const p5H = sortedHyb[Math.floor(numAng * 0.05)];
+          let sumFreqLin = 0;
+          for (let f of activeFreqs) {
+            sumFreqLin += computeTwoRayPoint(tx1, rx1, tgt, f, pol, ground, 0.05).snr_lin;
+          }
+          snrFreqMrcAng.push(10 * Math.log10(Math.max(sumFreqLin, 1e-6)));
 
-      document.getElementById('p5SingleAng').innerText = (p5S >= 0 ? '+' : '') + p5S.toFixed(1) + ' dB';
-      document.getElementById('p5HybAng').innerText = (p5H >= 0 ? '+' : '') + p5H.toFixed(1) + ' dB';
-      document.getElementById('gainAng').innerText = '+' + (p5H - p5S).toFixed(1) + ' dB';
-
-      const avgPdSingle = (pdSingleAng.reduce((a, b) => a + b, 0) / numAng) * 100;
-      const avgPdHyb = (pd3dMrcAng.reduce((a, b) => a + b, 0) / numAng) * 100;
-      document.getElementById('meanPdSingle').innerText = avgPdSingle.toFixed(1) + '%';
-      document.getElementById('meanPdHyb').innerText = avgPdHyb.toFixed(1) + '%';
-
-      drawAngularPlot(snrSingleAng, snrMimoAng, snrFreqMrcAng, snr3dMrcAng);
-
-      // 2. RANGE SWEEP (5 km to 100 km)
-      const numR = 250;
-      const rMin = 5e3, rMax = 100e3;
-      const snrSingleR = [], snrFreeR = [], snr3dMrcR = [], rVecKm = [];
-      const azRad = (azCut * Math.PI) / 180;
-
-      for (let i = 0; i < numR; i++) {
-        const rVal = rMin + (i / (numR - 1)) * (rMax - rMin);
-        rVecKm.push(rVal / 1e3);
-        const tgt = { x: rVal * Math.cos(azRad), y: rVal * Math.sin(azRad), z: tgtH };
-
-        const ptBase = computeTwoRayPoint(tx1, rx1, tgt, fc, pol, ground, 0.05);
-        snrSingleR.push(ptBase.snr_multipath_db);
-        snrFreeR.push(ptBase.snr_free_db);
-
-        let sum3d = 0;
-        for (let ht of txHeights) {
-          for (let hr of rxHeights) {
-            for (let f of activeFreqs) {
-              sum3d += computeTwoRayPoint({ x: -baseline/2, y: 0, z: ht }, { x: baseline/2, y: 0, z: hr }, tgt, f, pol, ground, 0.05).snr_lin;
+          const branchSnrsLin = [];
+          let sum3dLin = 0;
+          for (let ht of txHeights) {
+            for (let hr of rxHeights) {
+              for (let f of activeFreqs) {
+                const pt = computeTwoRayPoint({ x: -baseline/2, y: 0, z: ht }, { x: baseline/2, y: 0, z: hr }, tgt, f, pol, ground, 0.05);
+                branchSnrsLin.push(pt.snr_lin * 50.0);
+                sum3dLin += pt.snr_lin;
+              }
             }
           }
+          snr3dMrcAng.push(10 * Math.log10(Math.max(sum3dLin, 1e-6)));
+          pd3dMrcAng.push(calcPdMrc(branchSnrsLin, pfa));
         }
-        snr3dMrcR.push(10 * Math.log10(Math.max(sum3d, 1e-6)));
+
+        const sortedSingle = [...snrSingleAng].sort((a, b) => a - b);
+        const sortedHyb = [...snr3dMrcAng].sort((a, b) => a - b);
+        const p5S = sortedSingle[Math.floor(numAng * 0.05)];
+        const p5H = sortedHyb[Math.floor(numAng * 0.05)];
+
+        document.getElementById('p5SingleAng').innerText = (p5S >= 0 ? '+' : '') + p5S.toFixed(1) + ' dB';
+        document.getElementById('p5HybAng').innerText = (p5H >= 0 ? '+' : '') + p5H.toFixed(1) + ' dB';
+        document.getElementById('gainAng').innerText = '+' + (p5H - p5S).toFixed(1) + ' dB';
+
+        const avgPdSingle = (pdSingleAng.reduce((a, b) => a + b, 0) / numAng) * 100;
+        const avgPdHyb = (pd3dMrcAng.reduce((a, b) => a + b, 0) / numAng) * 100;
+        document.getElementById('meanPdSingle').innerText = avgPdSingle.toFixed(1) + '%';
+        document.getElementById('meanPdHyb').innerText = avgPdHyb.toFixed(1) + '%';
+
+        drawAngularPlot(snrSingleAng, snrMimoAng, snrFreqMrcAng, snr3dMrcAng);
+
+        // 2. RANGE SWEEP (5 km to 100 km)
+        const numR = 250;
+        const rMin = 5e3, rMax = 100e3;
+        const snrSingleR = [], snrFreeR = [], snr3dMrcR = [], rVecKm = [];
+        const azRad = (azCut * Math.PI) / 180;
+
+        for (let i = 0; i < numR; i++) {
+          const rVal = rMin + (i / (numR - 1)) * (rMax - rMin);
+          rVecKm.push(rVal / 1e3);
+          const tgt = { x: rVal * Math.cos(azRad), y: rVal * Math.sin(azRad), z: tgtH };
+
+          const ptBase = computeTwoRayPoint(tx1, rx1, tgt, fc, pol, ground, 0.05);
+          snrSingleR.push(ptBase.snr_multipath_db);
+          snrFreeR.push(ptBase.snr_free_db);
+
+          let sum3d = 0;
+          for (let ht of txHeights) {
+            for (let hr of rxHeights) {
+              for (let f of activeFreqs) {
+                sum3d += computeTwoRayPoint({ x: -baseline/2, y: 0, z: ht }, { x: baseline/2, y: 0, z: hr }, tgt, f, pol, ground, 0.05).snr_lin;
+              }
+            }
+          }
+          snr3dMrcR.push(10 * Math.log10(Math.max(sum3d, 1e-6)));
+        }
+
+        drawRangePlot(rVecKm, snrSingleR, snrFreeR, snr3dMrcR);
+
+        // 3. SPATIAL 2D HEATMAP
+        if (!document.getElementById('spatialTab').classList.contains('hidden')) {
+          drawSpatialHeatmap(tx1, rx1, fc, pol, ground, tgtH, radius);
+        }
+
+        // 4. STATISTICAL CDF / CCDF
+        drawCdfPlot(snrSingleAng, snrMimoAng, snrFreqMrcAng, snr3dMrcAng);
+
+        // 5. DETECTION PD CANVAS
+        drawPdPlot(pdSingleAng, pd3dMrcAng);
+      } catch (err) {
+        console.error('Update error:', err);
       }
-
-      drawRangePlot(rVecKm, snrSingleR, snrFreeR, snr3dMrcR);
-
-      // 3. SPATIAL 2D HEATMAP
-      if (!document.getElementById('spatialTab').classList.contains('hidden')) {
-        drawSpatialHeatmap(tx1, rx1, fc, pol, ground, tgtH, radius);
-      }
-
-      // 4. STATISTICAL CDF / CCDF
-      drawCdfPlot(snrSingleAng, snrMimoAng, snrFreqMrcAng, snr3dMrcAng);
-
-      // 5. DETECTION PD CANVAS
-      drawPdPlot(pdSingleAng, pd3dMrcAng);
     }
 
-    // --- CANVAS PLOTTING HELPERS ---
     function drawAngularPlot(single, mimo, freqMrc, hybMrc) {
       const cvs = document.getElementById('angularCanvas');
       if (!cvs) return;
@@ -935,7 +998,6 @@
       const toX = (idx) => pad.left + (idx / 360) * pW;
       const toY = (pd) => pad.top + pH * (1 - pd);
 
-      // Grid lines for Pd = 0%, 25%, 50%, 75%, 90%, 100%
       ctx.strokeStyle = '#334155'; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
       [0.0, 0.25, 0.5, 0.75, 1.0].forEach(p => {
         const y = toY(p);
@@ -944,14 +1006,12 @@
       });
       ctx.setLineDash([]);
 
-      // 90% Detection Threshold Line
       const y90 = toY(0.90);
       ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 1.5; ctx.setLineDash([6, 3]);
       ctx.beginPath(); ctx.moveTo(pad.left, y90); ctx.lineTo(W - pad.right, y90); ctx.stroke();
       ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 10px monospace'; ctx.fillText('P_d = 90% Threshold', W - 150, y90 - 5);
       ctx.setLineDash([]);
 
-      // Single Channel Pd Curve
       ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 1.6;
       ctx.beginPath();
       for (let i = 0; i < pdSingle.length; i++) {
@@ -961,7 +1021,6 @@
       }
       ctx.stroke();
 
-      // 3D Hybrid MRC Pd Curve
       ctx.strokeStyle = '#34d399'; ctx.lineWidth = 2.6;
       ctx.beginPath();
       for (let i = 0; i < pdHyb.length; i++) {
@@ -971,14 +1030,12 @@
       }
       ctx.stroke();
 
-      // Azimuth Ticks
       for (let deg = 0; deg <= 360; deg += 45) {
         const x = toX(deg);
         ctx.strokeStyle = '#334155'; ctx.beginPath(); ctx.moveTo(x, pad.top); ctx.lineTo(x, pad.top + pH); ctx.stroke();
         ctx.fillStyle = '#94a3b8'; ctx.font = '10px sans-serif'; ctx.fillText(deg + '\u00B0', x - 8, H - 15);
       }
 
-      // X & Y Labels
       ctx.fillStyle = '#cbd5e1'; ctx.font = '11px sans-serif';
       ctx.fillText('Target Azimuth Angle \u03B8 (\u00B0)', W / 2 - 60, H - 2);
 
@@ -989,12 +1046,13 @@
       ctx.restore();
     }
 
-    // Attach Event Listeners
     const inputs = ['fcInput', 'ht1Input', 'ht2Input', 'hr1Input', 'hr2Input', 'baseInput', 'tgtHInput', 'radiusInput', 'azCutInput', 'polSelect', 'groundSelect', 'pfaExpInput', 'txDivCheck', 'rxDivCheck', 'f1Check', 'f2Check', 'f3Check', 'f4Check', 'f5Check'];
     inputs.forEach(id => {
       const el = document.getElementById(id);
-      if (el) el.addEventListener('input', updateAll);
-      if (el) el.addEventListener('change', updateAll);
+      if (el) {
+        el.addEventListener('input', updateAll);
+        el.addEventListener('change', updateAll);
+      }
     });
 
     document.getElementById('resetBtn').addEventListener('click', () => {
@@ -1020,9 +1078,10 @@
       updateAll();
     });
 
-    window.addEventListener('DOMContentLoaded', () => {
-      updateAll();
-    });
+    // Immediate execution
+    updateAll();
+    window.onload = updateAll;
+    window.addEventListener('DOMContentLoaded', updateAll);
   </script>
 </body>
 </html>
