@@ -417,8 +417,24 @@
       seawater: { eps_r: 80.0, sigma: 4.0 },
       freshwater: { eps_r: 81.0, sigma: 0.001 }
     };
-    const EPS_0 = 8.8541878128e-12;
-    const C_LIGHT = 299792458.0;
+    // Fundamental Physical & Thermodynamic Constants
+    const C_LIGHT = 299792458.0;              // Speed of light in vacuum (m/s)
+    const EPS_0 = 8.8541878128e-12;            // Permittivity of vacuum (F/m)
+    const K_BOLTZMANN = 1.380649e-23;          // Boltzmann constant (J/K)
+    const T_0 = 290.0;                         // Reference noise temperature (K)
+    const FOUR_PI_CUBED = Math.pow(4 * Math.PI, 3); // (4*pi)^3 radar propagation constant
+
+    // Physical Radar Link Budget Parameters (FM Passive Radar System)
+    const P_TX_WATTS = 10000.0;                // Transmitter Power = 10 kW ERP
+    const G_TX_LIN = Math.pow(10, 10.0 / 10.0); // Tx Antenna Gain = 10 dBi (10.0 linear)
+    const G_RX_LIN = Math.pow(10, 10.0 / 10.0); // Rx Antenna Gain = 10 dBi (10.0 linear)
+    const G_CPI_LIN = Math.pow(10, 30.0 / 10.0); // Coherent Processing / Doppler Gain = 30 dB (1000.0 linear)
+    const SIGMA_0 = 1.0;                       // Baseline target monostatic RCS = 1.0 m^2
+    const BANDWIDTH_HZ = 100000.0;             // Receiver Bandwidth = 100 kHz
+    const NOISE_FIG_LIN = Math.pow(10, 4.0 / 10.0); // Receiver Noise Figure = 4 dB (2.5119 linear)
+
+    // Calculated Thermal Noise Floor: P_n = k_B * T_0 * B * F_n
+    const P_NOISE_WATTS = K_BOLTZMANN * T_0 * BANDWIDTH_HZ * NOISE_FIG_LIN;
 
     function showTab(tabId) {
       const tabs = ['angularTab', 'rangeTab', 'spatialTab', 'statsTab', 'pdTab'];
@@ -506,7 +522,7 @@
       const F_t = computePathF(tx.z, tgt.z, d_tx_tgt, freq, pol, groundType, roughness);
       const F_r = computePathF(rx.z, tgt.z, d_rx_tgt, freq, pol, groundType, roughness);
       
-      // CRITICAL FIX: Two-way power factor F^4 is |F_t|^2 * |F_r|^2 = (F_t * F_r)^2
+      // Two-way power factor F^4 is |F_t|^2 * |F_r|^2 = (F_t * F_r)^2
       const F_total_pwr = Math.pow(F_t, 2) * Math.pow(F_r, 2);
 
       // Bistatic angle beta
@@ -516,11 +532,19 @@
       const beta = Math.acos(dot);
       
       // Kell empirical forward-scatter / bisector model: sigma_b = sigma_0 * cos^2(beta/2)
-      const rcs_factor = Math.max(0.05, Math.pow(Math.cos(beta / 2), 2));
+      const sigma_b = SIGMA_0 * Math.max(0.05, Math.pow(Math.cos(beta / 2), 2));
 
-      // Calibrated radar power constant: Pt=10kW, Gt=10dBi, Gr=10dBi, Gp=30dB (CPI processing gain), B=100kHz, Fn=4dB
-      const C_radar = 1.0e20;
-      const snr_free_lin = (C_radar * rcs_factor) / (Math.pow(r_t_3d, 2) * Math.pow(r_r_3d, 2));
+      // Dynamic Wavelength calculated per branch frequency: lambda = c / freq
+      const wavelength = C_LIGHT / freq;
+
+      // Free-space received signal power (Bistatic Radar Range Equation):
+      // P_r = (P_t * G_t * G_r * lambda^2 * sigma_b * G_CPI) / ((4 * pi)^3 * R_t^2 * R_r^2)
+      const r_t_sq = Math.max(1.0, Math.pow(r_t_3d, 2));
+      const r_r_sq = Math.max(1.0, Math.pow(r_r_3d, 2));
+      const p_rx_free_watts = (P_TX_WATTS * G_TX_LIN * G_RX_LIN * Math.pow(wavelength, 2) * sigma_b * G_CPI_LIN) / (FOUR_PI_CUBED * r_t_sq * r_r_sq);
+
+      // Dynamic Signal-to-Noise Ratios:
+      const snr_free_lin = p_rx_free_watts / P_NOISE_WATTS;
       const snr_multipath_lin = snr_free_lin * F_total_pwr;
 
       return {
