@@ -64,7 +64,9 @@ This suite provides:
 
 ### 2.1 3D Vector Geometry & Image Theory
 Let the transmitter, receiver, and target positions in 3D Cartesian coordinates be:
+
 $$\mathbf{p}_t = \left[-\frac{L}{2}, 0, h_t\right]^T, \quad \mathbf{p}_r = \left[+\frac{L}{2}, 0, h_r\right]^T, \quad \mathbf{p}_{\text{tgt}} = [x, y, z_t]^T$$
+
 where $L$ is the bistatic baseline distance, $h_t$ is the Tx mast height, $h_r$ is the Rx mast height, and $z_t$ is the target altitude above the flat ground plane ($z = 0$).
 
 By electromagnetic image theory:
