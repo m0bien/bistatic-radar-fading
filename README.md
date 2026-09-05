@@ -76,10 +76,21 @@ By electromagnetic image theory:
 - **Tx Grazing Angle**: $\psi_t = \arctan\left(\frac{z_t + h_t}{d_t}\right)$
 
 Similarly for the **Target-to-Rx Path**:
-- **Target-to-Rx Direct Path**: $R_{rd} = \|\mathbf{p}_r - \mathbf{p}_{\text{tgt}}\| = \sqrt{d_r^2 + (z_t - h_r)^2}$
-- **Target-to-Rx Reflected Path**: $R_{rr} = \|\mathbf{p}_r^{\text{img}} - \mathbf{p}_{\text{tgt}}\| = \sqrt{d_r^2 + (z_t + h_r)^2}$
-- **Rx Path Difference**: $\Delta R_r = R_{rr} - R_{rd} \approx \frac{2 h_r z_t}{d_r}$
-- **Rx Grazing Angle**: $\psi_r = \arctan\left(\frac{z_t + h_r}{d_r}\right)$
+- **Target-to-Rx Direct Path**:
+-
+- $R_{rd} = \|\mathbf{p}_r - \mathbf{p}_{\text{tgt}}\| = \sqrt{d_r^2 + (z_t - h_r)^2}$
+-
+- **Target-to-Rx Reflected Path**:
+-
+- $R_{rr} = \|\mathbf{p}_r^{\text{img}} - \mathbf{p}_{\text{tgt}}\| = \sqrt{d_r^2 + (z_t + h_r)^2}$
+-
+- **Rx Path Difference**:
+-
+- $\Delta R_r = R_{rr} - R_{rd} \approx \frac{2 h_r z_t}{d_r}$
+-
+- **Rx Grazing Angle**:
+-
+- $\psi_r = \arctan\left(\frac{z_t + h_r}{d_r}\right)$
 
 ---
 
