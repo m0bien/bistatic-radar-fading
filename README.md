@@ -71,27 +71,23 @@ where $L$ is the bistatic baseline distance, $h_t$ is the Tx mast height, $h_r$ 
 
 By electromagnetic image theory:
 - **Tx-to-Target Direct Path**: $R_{td} = \|\mathbf{p}_{\text{tgt}} - \mathbf{p}_t\| = \sqrt{d_t^2 + (z_t - h_t)^2}$
-- **Tx-to-Target Reflected Path**: $R_{tr} = \|\mathbf{p}_{\text{tgt}} - \mathbf{p}_t^{\text{img}}\| = \sqrt{d_t^2 + (z_t + h_t)^2}$
+- **Tx-to-Target Reflected Path**: $R_{tr} = \|\mathbf{p}_{\text{tgt}} - \mathbf{p}_t^{*}\| = \sqrt{d_t^2 + (z_t + h_t)^2}$
 - **Tx Path Difference**: $\Delta R_t = R_{tr} - R_{td} \approx \frac{2 h_t z_t}{d_t}$
 - **Tx Grazing Angle**: $\psi_t = \arctan\left(\frac{z_t + h_t}{d_t}\right)$
 
 Similarly for the **Target-to-Rx Path**:
 - **Target-to-Rx Direct Path**:
--
-- $R_{rd} = \|\mathbf{p}_r - \mathbf{p}_{\text{tgt}}\| = \sqrt{d_r^2 + (z_t - h_r)^2}$
--
-- **Target-to-Rx Reflected Path**:
--
-- $R_{rr} = \|\mathbf{p}_r^{\text{img}} - \mathbf{p}_{\text{tgt}}\| = \sqrt{d_r^2 + (z_t + h_r)^2}$
--
-- **Rx Path Difference**:
--
-- $\Delta R_r = R_{rr} - R_{rd} \approx \frac{2 h_r z_t}{d_r}$
--
-- **Rx Grazing Angle**:
--
-- $\psi_r = \arctan\left(\frac{z_t + h_r}{d_r}\right)$
+  
+  $R_{rd} = \|-\mathbf{p}_{\text{tgt}} + \mathbf{p}_r\| = \sqrt{d_r^2 + (z_t - h_r)^2}$
 
+- **Target-to-Rx Reflected Path**:
+
+  $$R_{rr} = \|-\mathbf{p}_{\text{tgt}} + \mathbf{p}_r^*\| = \sqrt{d_r^2 + (z_t + h_r)^2}$$
+
+- **Rx Path Difference**: $\Delta R_r = R_{rr} - R_{rd} \approx \frac{2 h_r z_t}{d_r}$
+- **Rx Grazing Angle**: $\psi_r = \arctan\left(\frac{z_t + h_r}{d_r}\right)$
+
+- **Note**: $(^*)$ is for the image path depicting the reflection. 
 ---
 
 ### 2.2 Complex Fresnel Reflection & Dielectric Ground
@@ -207,7 +203,9 @@ $$\gamma_{\text{MRC}} = \sum_{m=1}^{12} \gamma_m$$
 
 ### 5.2 Channel Hardening via Diversity
 When $M$ independent diversity channels are combined via MRC, the sum SNR follows a **Gamma distribution (Chi-Square with $2M$ degrees of freedom)**:
+
 $$P_d(M) = \exp\left(-\frac{\gamma_{\text{th}}}{1 + \bar{\gamma}_0}\right) \sum_{k=0}^{M-1} \frac{1}{k!} \left(\frac{\gamma_{\text{th}}}{1 + \bar{\gamma}_0}\right)^k$$
+
 As $M \to 12$, the variance vanishes (**Channel Hardening**), and the required SNR drops to **$9.76\text{ dB}$** (saving **$11.40\text{ dB}$ of transmitter power** compared to single channel).
 
 ### 5.3 Outage Probability (CDF) vs. Reliability Coverage (CCDF)
@@ -246,7 +244,7 @@ $$\mathbf{P_{\text{reliability}}(\gamma_{\text{th}}) = 1.0 - P_{\text{outage}}(\
 
 ### 🌐 Live Web Browser (Interactive Dashboard)
 - **Local**: Open `bistatic_radar_dashboard.html` or `index.html` in any web browser (Chrome, Firefox, Edge, Safari). No web server or internet connection required.
-- **GitHub Pages**: Enabled by hosting `index.html` on the `main` branch.
+- **GitHub Pages**: Enabled by hosting `index.html` on the `main` branch [https://m0bien.github.io/bistatic-radar-fading/].
 
 ### 🐍 Running the Python Simulation Suite
 Ensure Python 3.8+ is installed with `numpy`, `scipy`, and `matplotlib`:
