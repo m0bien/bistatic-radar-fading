@@ -424,13 +424,13 @@
     const T_0 = 290.0;                         // Reference noise temperature (K)
     const FOUR_PI_CUBED = Math.pow(4 * Math.PI, 3); // (4*pi)^3 radar propagation constant
 
-    // Physical Radar Link Budget Parameters (FM Passive Radar System)
-    const P_TX_WATTS = 10000.0;                // Transmitter Power = 10 kW ERP
+    // Physical Radar Link Budget Parameters (Commercial FM Passive Radar System)
+    const P_TX_WATTS = 2000.0;                 // Transmitter Power = 2 kW FM station ERP
     const G_TX_LIN = Math.pow(10, 10.0 / 10.0); // Tx Antenna Gain = 10 dBi (10.0 linear)
     const G_RX_LIN = Math.pow(10, 10.0 / 10.0); // Rx Antenna Gain = 10 dBi (10.0 linear)
-    const G_CPI_LIN = Math.pow(10, 30.0 / 10.0); // Coherent Processing / Doppler Gain = 30 dB (1000.0 linear)
-    const SIGMA_0 = 1.0;                       // Baseline target monostatic RCS = 1.0 m^2
-    const BANDWIDTH_HZ = 100000.0;             // Receiver Bandwidth = 100 kHz
+    const G_CPI_LIN = Math.pow(10, 20.0 / 10.0); // Coherent Processing / Doppler Gain = 20 dB (100.0 linear, 100 ms CPI)
+    const SIGMA_0 = 1.0;                        // Baseline target monostatic RCS = 1.0 m^2
+    const BANDWIDTH_HZ = 100000.0;              // Receiver Bandwidth = 100 kHz
     const NOISE_FIG_LIN = Math.pow(10, 4.0 / 10.0); // Receiver Noise Figure = 4 dB (2.5119 linear)
 
     // Calculated Thermal Noise Floor: P_n = k_B * T_0 * B * F_n
@@ -646,8 +646,6 @@
 
           const ptSingle = computeTwoRayPoint(tx1, rx1, tgt, fc, pol, ground, 0.05);
           snrSingleAng.push(ptSingle.snr_multipath_db);
-          
-          // EXACT CONSISTENCY: Directly use ptSingle.snr_lin without any arbitrary scaling
           pdSingleAng.push(calcPdRayleigh(ptSingle.snr_lin, pfa));
 
           // Spatial MIMO (All Tx x All Rx at fc)
@@ -741,6 +739,7 @@
       }
     }
 
+    // ADAPTIVE DYNAMIC Y-AXIS ANGULAR PLOT
     function drawAngularPlot(single, mimo, freqMrc, hybMrc) {
       const cvs = document.getElementById('angularCanvas');
       if (!cvs) return;
@@ -748,25 +747,33 @@
       const W = cvs.width, H = cvs.height;
       ctx.clearRect(0, 0, W, H);
 
-      const pad = { top: 25, bottom: 40, left: 50, right: 25 };
+      const pad = { top: 25, bottom: 40, left: 55, right: 25 };
       const pW = W - pad.left - pad.right;
       const pH = H - pad.top - pad.bottom;
 
-      const minDb = -10, maxDb = 35;
+      // Dynamic bounds based on actual data
+      const allVals = [...single, ...mimo, ...freqMrc, ...hybMrc];
+      const dataMin = Math.min(...allVals);
+      const dataMax = Math.max(...allVals);
+      const minDb = Math.floor((dataMin - 5) / 10) * 10;
+      const maxDb = Math.ceil((dataMax + 5) / 10) * 10;
+
       const toY = (db) => pad.top + pH * (1 - (db - minDb) / (maxDb - minDb));
       const toX = (idx) => pad.left + (idx / 360) * pW;
 
       ctx.strokeStyle = '#334155'; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
-      for (let db = -10; db <= 30; db += 10) {
+      for (let db = minDb; db <= maxDb; db += 10) {
         const y = toY(db);
         ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
-        ctx.fillStyle = '#94a3b8'; ctx.font = '10px monospace'; ctx.fillText(db + ' dB', 12, y + 3);
+        ctx.fillStyle = '#94a3b8'; ctx.font = '10px monospace'; ctx.fillText((db >= 0 ? '+' : '') + db + ' dB', 10, y + 3);
       }
       ctx.setLineDash([]);
 
-      const y0 = toY(0);
-      ctx.strokeStyle = '#64748b'; ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.moveTo(pad.left, y0); ctx.lineTo(W - pad.right, y0); ctx.stroke();
+      if (minDb <= 0 && maxDb >= 0) {
+        const y0 = toY(0);
+        ctx.strokeStyle = '#64748b'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(pad.left, y0); ctx.lineTo(W - pad.right, y0); ctx.stroke();
+      }
 
       function plotCurve(data, color, lw, dash=[]) {
         ctx.strokeStyle = color; ctx.lineWidth = lw; ctx.setLineDash(dash);
@@ -795,6 +802,7 @@
       ctx.fillText('Target Azimuth Angle \u03B8 (\u00B0)', W / 2 - 60, H - 2);
     }
 
+    // ADAPTIVE DYNAMIC Y-AXIS RANGE PLOT
     function drawRangePlot(rVec, single, free, hyb) {
       const cvs = document.getElementById('rangeCanvas');
       if (!cvs) return;
@@ -802,19 +810,25 @@
       const W = cvs.width, H = cvs.height;
       ctx.clearRect(0, 0, W, H);
 
-      const pad = { top: 25, bottom: 40, left: 50, right: 25 };
+      const pad = { top: 25, bottom: 40, left: 55, right: 25 };
       const pW = W - pad.left - pad.right;
       const pH = H - pad.top - pad.bottom;
 
-      const minDb = -15, maxDb = 40;
+      const allVals = [...single, ...free, ...hyb];
+      const dataMin = Math.min(...allVals);
+      const dataMax = Math.max(...allVals);
+      const minDb = Math.floor((dataMin - 5) / 10) * 10;
+      const maxDb = Math.ceil((dataMax + 5) / 10) * 10;
+      const step = (maxDb - minDb) > 80 ? 20 : 10;
+
       const toY = (db) => pad.top + pH * (1 - (db - minDb) / (maxDb - minDb));
       const toX = (r) => pad.left + ((r - 5) / (100 - 5)) * pW;
 
       ctx.strokeStyle = '#334155'; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
-      for (let db = -10; db <= 35; db += 10) {
+      for (let db = minDb; db <= maxDb; db += step) {
         const y = toY(db);
         ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
-        ctx.fillStyle = '#94a3b8'; ctx.font = '10px monospace'; ctx.fillText(db + ' dB', 12, y + 3);
+        ctx.fillStyle = '#94a3b8'; ctx.font = '10px monospace'; ctx.fillText((db >= 0 ? '+' : '') + db + ' dB', 10, y + 3);
       }
       ctx.setLineDash([]);
 
@@ -943,6 +957,7 @@
       ctx.fillText('Rx', toCanvasX(rx.x / 1e3) - 7, toCanvasY(rx.y / 1e3) - 10);
     }
 
+    // ADAPTIVE DYNAMIC X-AXIS CDF PLOT
     function drawCdfPlot(single, mimo, freqMrc, hybMrc) {
       const cvs = document.getElementById('cdfCanvas');
       if (!cvs) return;
@@ -955,7 +970,12 @@
       const pW = W - pad.left - pad.right;
       const pH = H - pad.top - pad.bottom;
 
-      const thMin = -10, thMax = 35;
+      const allVals = [...single, ...mimo, ...freqMrc, ...hybMrc];
+      const dataMin = Math.min(...allVals);
+      const dataMax = Math.max(...allVals);
+      const thMin = Math.floor((dataMin - 5) / 5) * 5;
+      const thMax = Math.ceil((dataMax + 5) / 5) * 5;
+      const step = (thMax - thMin) > 50 ? 10 : 5;
       const numPts = 100;
 
       function calcProb(data, th) {
@@ -993,10 +1013,10 @@
       plotProb(freqMrc, '#3b82f6', 1.8);
       plotProb(hybMrc, '#34d399', 2.5);
 
-      for (let th = -10; th <= 30; th += 10) {
+      for (let th = thMin; th <= thMax; th += step) {
         const x = toX(th);
         ctx.strokeStyle = '#334155'; ctx.beginPath(); ctx.moveTo(x, pad.top); ctx.lineTo(x, pad.top + pH); ctx.stroke();
-        ctx.fillStyle = '#94a3b8'; ctx.font = '10px sans-serif'; ctx.fillText(th + ' dB', x - 12, H - 15);
+        ctx.fillStyle = '#94a3b8'; ctx.font = '10px sans-serif'; ctx.fillText((th >= 0 ? '+' : '') + th + ' dB', x - 12, H - 15);
       }
 
       ctx.fillStyle = '#cbd5e1'; ctx.font = '11px sans-serif';

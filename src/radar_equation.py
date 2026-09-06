@@ -22,14 +22,14 @@ def bistatic_rcs_model(
 
 def calculate_bistatic_received_power(
     two_ray_result: Dict[str, Any],
-    p_tx_watts: float = 10000.0,
+    p_tx_watts: float = 2000.0,
     g_tx_db: float = 10.0,
     g_rx_db: float = 10.0,
     sigma_m2: float = 1.0,
     target_rcs_type: str = "sphere",
     noise_figure_db: float = 4.0,
     bandwidth_hz: float = 100e3,
-    processing_gain_db: float = 30.0,
+    processing_gain_db: float = 20.0,
     frequency_hz: float = 98.0e6
 ) -> Dict[str, Any]:
     """
